@@ -13,22 +13,19 @@ CroMag helps to version all of the projects within a solution via a single file 
 
 CroMagVersion allows projects to share the following assembly attributes:
 
-* [AssemblyCompany](http://msdn.microsoft.com/en-us/library/system.reflection.assemblycompanyattribute.aspx)
-	Uses $(VersionCompany) and $(VersionCompanyUrl) from ```version.props```
-* [AssemblyCopyright](http://msdn.microsoft.com/en-us/library/system.reflection.assemblycopyrightattribute.aspx)
-	Copyright $(Year) $(VersionCompany) from ```version.props```
-* [AssemblyConfiguration](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyconfigurationattribute.aspx)
-	Annotated with build Configuration (i.e. Debug, Release) and the SHA1 hash of the current source version
+* [AssemblyCompany](http://msdn.microsoft.com/en-us/library/system.reflection.assemblycompanyattribute.aspx) - Uses $(VersionCompany) and $(VersionCompanyUrl) from ```version.props```
+* [AssemblyCopyright](http://msdn.microsoft.com/en-us/library/system.reflection.assemblycopyrightattribute.aspx) - Copyright $(Year) $(VersionCompany) from ```version.props```
+* [AssemblyConfiguration](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyconfigurationattribute.aspx) - Annotated with build Configuration (i.e. Debug, Release) and the SHA1 hash of the current source version
 
-* [AssemblyVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyversionattribute.aspx)	
-* [AssemblyFileVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyfileversionattribute.aspx)
-* [AssemblyInformationalVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyinformationalversionattribute.aspx)
+* [AssemblyVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyversionattribute.aspx) - Calculates date convention based version
+* [AssemblyFileVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyfileversionattribute.aspx) - Calculates date convention based version
+* [AssemblyInformationalVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyinformationalversionattribute.aspx) - Calculates date convention based version
 
 ## How does it work?
 
 * During the package installation ```SharedAssemblyInfo.cs``` is added to the project file as a **linked file**.  This file will be shared amongst all projects that install the package, and not actually copied into any projects.
 
-* A new msbuild file called ```version.props``` is copied to the solution folder if it doesn't exist - this is where user modifications such as major and minor version should be made.  These values are configurable and should always be modified by hand as needed.  If following semantic guidelines, there's no easy way to identify what things are breaking changes - this requires a human of at least average intelligene.
+* A new msbuild file called ```version.props``` is copied to the solution folder if it doesn't exist - this is where user modifications such as major and minor version should be made.  These values are configurable and should always be modified by hand as needed.  If following semantic guidelines, there's no easy way to identify what things are breaking changes - this requires a human of at least average intelligence.
 
 ```xml
 <MajorVersion>0</MajorVersion>
@@ -41,14 +38,14 @@ CroMagVersion allows projects to share the following assembly attributes:
 -->
 ```
 
-* A ```CroMagVersion.targets``` file is injected into the project that contains the version update code
+* A ```CroMagVersion.targets``` file is injected into the project as an [Import](http://msdn.microsoft.com/en-us/library/92x05xfs.aspx) that contains the version update code
 
 * Before the build goes down, ```SharedAssemblyInfo.cs``` file is updated with the major / minor version from ```version.props``` and has date based version information added in the following format:
 $(MajorVersion).$(MinorVersion).$(YearMonth).$(DayNumber)$(Build)
 
-```YearMonth``` is a 2 digit year, 2 digit month - for instance 1203
-```DayNumber``` is a 2 digit day - for instance 03 or 31
-```$(Build)``` is 0 by default, or ```BUILD_NUMBER``` environment variable as supplied by Jenkins or via an override in ```version.props```.  Only the last 3 digits of this number can be used, as each fragment of the build number has a maximum of 65536.
+    * ```YearMonth``` is a 2 digit year, 2 digit month - for instance 1203
+    * ```DayNumber``` is a 2 digit day - for instance 03 or 31
+    * ```$(Build)``` is 0 by default, or ```BUILD_NUMBER``` environment variable as supplied by Jenkins or via an override in ```version.props```.  Only the last 3 digits of this number can be used, as each fragment of the build number has a maximum of 65536.
 
 
 Is this the best way to date tag a build?  Not necessarily, but it's a pretty reasonable solution that results in something human readable after the fact.
@@ -60,7 +57,6 @@ Is this the best way to date tag a build?  Not necessarily, but it's a pretty re
 
 ## Future Improvements
 
-* Remove dependency on msbuild community tasks
 * Add Git support
 * Ensure Mono works properly
 
