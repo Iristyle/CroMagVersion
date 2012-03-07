@@ -19,5 +19,7 @@
   </metadata>
   <files>
     <file src="tools\*" target="tools" /> 
+    <!-- nuget package needs something in content, otherwise it won't run install.ps1 --> 
+    <file src="content\README.txt" target="content\Properties\README-CroMagVersion.txt" />
   </files>
 </package>
