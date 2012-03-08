@@ -43,6 +43,10 @@
 		<Message Text="Last revision from HG: $(Revision) $(Changeset) - calculated version $(VersionNumber)"/>    
 
 		<ItemGroup>
+			<Lines Include="//~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*" />
+			<Lines Include="//DANGER WILL ROBINSON - TOOL GENERATED FILE - DO NOT MODIFY THIS FILE BY HAND!" />
+			<Lines Include="//USE THE SOLUTIONS VERSION.PROPS TO TWEAK MINOR / MAJOR VERSIONS" />
+			<Lines Include="//~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*" />
 			<Lines Include="using System%3B" />
 			<Lines Include="using System.Reflection%3B" />
 			<Lines Include="using System.Resources%3B" />
