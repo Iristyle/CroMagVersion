@@ -53,30 +53,31 @@ $msbuild.Xml.AddProperty($package.Id, $relativePath ) | Out-Null
 Write-Host "Added property $($package.Id)"
 
 # add the target if necessary
+$targetsPath = "`$($($package.Id))\$($package.Id).targets"
+
 $importExists = ($msbuild.Xml.Imports | 
-? { $_.Project -ieq "`$($($package.Id))" } |
-Measure-Object | Select -ExpandProperty Count) -gt 0
+    ? { $_.Project -ieq $targetsPath } |
+    Measure-Object | Select -ExpandProperty Count) -gt 0
 
 if (! ($importExists))
-{
-    $targetsPath = "`$($($package.Id))\$($package.Id).targets"
+{    
     $import = $msbuild.Xml.AddImport($targetsPath)
     $import.Condition = "Exists('$targetsPath')"
     Write-Host "Added import of '$targetsPath'."
 }
 
-
 #link in sharedAssemblyInfo to the project
 $sharedAssemblyInfo = Join-Path $toolsPath 'SharedAssemblyInfo.cs'
 '' | Out-File $sharedAssemblyInfo
 
+$sharedAssemblyInfoPath = "`$($($package.Id))\SharedAssemblyInfo.cs"
 $sharedExists = ($msbuild.Xml.Items | 
-    ? { $_.Include -imatch "`$($($package.Id))`\SharedAssemblyInfo.cs" } |
+    ? { $_.Include -ieq $sharedAssemblyInfoPath } |
     Measure-Object | Select -ExpandProperty Count) -gt 0
 
 if (! ($sharedExists))
 {    
-    $include = $msbuild.Xml.AddItem("Compile", "`$($($package.Id))`\SharedAssemblyInfo.cs")
+    $include = $msbuild.Xml.AddItem("Compile", $sharedAssemblyInfoPath)
     $include.AddMetadata('Link','Properties\SharedAssemblyInfo.cs')
     #$propertiesFolder.ProjectItems.AddFromFile($sharedAssemblyInfo)
     Write-Host "Added link to SharedAssemblyInfo.cs."
