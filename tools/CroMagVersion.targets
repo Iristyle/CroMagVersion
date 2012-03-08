@@ -4,8 +4,6 @@
 		<!--Jenkins sets BUILD_NUMBER -->
 		<Build>$(BUILD_NUMBER)</Build>
 		<Build Condition="$(Build) == ''">0</Build><!-- set to 0 outside of CI -->
-		<!-- ensure we use only up to the last 3 characters of the build_number so we don't overrun 65536 -->
-		<Build Condition="$(Build.Length) > 3">$(Build.Substring($([MSBuild]::Subtract($(Build.Length), 3))))</Build>
 		<Revision>0</Revision>
 		<Configuration Condition="$(Configuration) == ''">Unspecified</Configuration>
 		<MSBuildMercurialTasksPath>$(MsBuildThisFileDirectory)</MSBuildMercurialTasksPath>
@@ -19,7 +17,7 @@
 			<MSBuildNamespace>&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003'/&gt;</MSBuildNamespace>
 		</PropertyGroup>
 		<ItemGroup>
-			<Nodes Include="MajorVersion;MinorVersion;VersionCompany;VersionCompanyUrl" />
+			<Nodes Include="MajorVersion;MinorVersion;VersionCompany;VersionCompanyUrl;BUILD_NUMBER" />
 		</ItemGroup>
 
 		<XmlPeek Namespaces="$(MSBuildNamespace)"
@@ -34,6 +32,18 @@
 			<MinorVersion>@(MinorVersion)</MinorVersion>
 			<VersionCompany>@(VersionCompany)</VersionCompany>
 			<VersionCompanyUrl>@(VersionCompanyUrl)</VersionCompanyUrl>
+			<!-- this value is optional, but has to be set to something so we don't chuck an error below -->
+			<BUILD_NUMBER Condition="@(BUILD_NUMBER) != ''">@(BUILD_NUMBER)</BUILD_NUMBER>
+			<BUILD_NUMBER Condition="@(BUILD_NUMBER) == ''">$(Build)</BUILD_NUMBER>
+			
+			<!-- this will end up being, in this order
+				- Override BUILD_NUMBER specified in version.props if present
+				- BUILD_NUMBER environment variable as specified by a build server like Jenkins
+				- 0 if not specified
+			 -->
+			<Build>$(BUILD_NUMBER)</Build>
+			<!-- ensure we use only up to the last 3 characters of the build_number so we don't overrun 65536 -->
+			<Build Condition="$(Build.Length) > 3">$(Build.Substring($([MSBuild]::Subtract($(Build.Length), 3))))</Build>
 		</PropertyGroup>
 
 		<Error Condition="$(%(Nodes.Identity)) == ''" Text="%(Nodes.Identity) must be entered into the version.props file" />
