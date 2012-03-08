@@ -9,6 +9,7 @@ CroMag helps to version all of the projects within a solution via a single file 
 * Nuget
 * Package restore via [PepitaGet](http://code.google.com/p/pepita/) (or Nuget) highly recommended
 * MSBuild 4 or higher (uses static property functions)
+* To have the current short SHA1 hash added to AssemblyConfiguration, you must be using Mercurial or Git
 
 ## What does it do?
 
@@ -57,7 +58,6 @@ Is this the best way to date tag a build?  Not necessarily, but it's a pretty re
 
 ## Future Improvements
 
-* Add Git support
 * Ensure Mono works properly
 
 ## Contributing
@@ -69,6 +69,7 @@ Any useful changes are welcomed.  If you have an idea you'd like to see implemen
 ## Credits
 
 * [MSBuild.Mercurial](http://msbuildhg.codeplex.com/) - tasks for retrieving info from a hg repo
+* [Git-Last-Commit Gist](https://gist.github.com/966148) - inline msbuild task for grabbing Git command line output
 * [StackOverlow - How can I auto increment the C# assembly version via our CI platform (Hudson)?](http://stackoverflow.com/questions/1126880/how-can-i-auto-increment-the-c-assembly-version-via-our-ci-platform-hudson)
 * [Mercurial Revision No to Version your AssemblyInfo - MsBuild Series](http://markkemper1.blogspot.com/2010/10/mercurial-revision-no-to-version-your.html)
 * The logo is from the [Dino Icon Pack](http://www.fasticon.com/freeware/dino-icons/) produced by FastIcon.

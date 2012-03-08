@@ -12,6 +12,54 @@
 	
 	<Import Project="$(MSBuildMercurialTasksPath)\MSBuild.Mercurial.tasks"/>
 
+	<!-- borrowed / modified from from https://gist.github.com/966148 -->
+	<UsingTask TaskName="GitVersion" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
+		<ParameterGroup>
+		  <LocalPath ParameterType="System.String" />
+		  <Path ParameterType="System.String" />
+		  <Changeset ParameterType="System.String" Output="true" />
+		</ParameterGroup>
+		<Task>
+		  <Using Namespace="System"/>
+		  <Using Namespace="System.IO"/>
+		  <Using Namespace="System.Diagnostics"/>
+		  <Code Type="Fragment" Language="cs">
+			<![CDATA[
+			  LocalPath = LocalPath ?? ".";
+			  
+			  Log.LogMessage(MessageImportance.Low, "LocalPath is {0}", LocalPath);
+			  var gitPath = File.Exists(@"c:\program files (x86)\git\bin\git.exe") ?
+			  	@"c:\program files (x86)\git\bin\git.exe" : @"c:\program files\git\bin\git.exe";
+
+			  var psi = new ProcessStartInfo(gitPath, "log -1 --pretty=format:%h") {
+			  	  WindowStyle = ProcessWindowStyle.Hidden,
+				  UseShellExecute = false, 
+				  ErrorDialog = false, 
+				  CreateNoWindow = false, 
+				  WorkingDirectory = LocalPath,
+				  RedirectStandardOutput = true,
+				  RedirectStandardError = true
+			  };
+
+			  using (var p = Process.Start(psi)) {
+				p.WaitForExit();
+				if (p.ExitCode != 0) {
+				  using (var standardError = p.StandardError) {
+					Log.LogError(standardError.ReadToEnd());
+				  }
+				  return false;
+				}
+
+				using (var standardOutput = p.StandardOutput) {
+				  Changeset = standardOutput.ReadToEnd();
+				}
+			  }
+			]]>
+		  </Code>
+		</Task>
+	</UsingTask>
+
+
 	<Target Name="Version" Returns="$(VersionNumber);$(Changeset);$(BuildVersion);$(RevisionVersion)" BeforeTargets="Build">
 		<PropertyGroup>
 			<MSBuildNamespace>&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003'/&gt;</MSBuildNamespace>
@@ -59,14 +107,16 @@
 			<VersionNumber>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</VersionNumber>
 		</PropertyGroup>
 
-		<!-- TODO: this busts when we're not Hg -->
-		<!-- TODO: integrate Git -->
 		<HgVersion LocalPath="$(MSBuildThisFileDirectory)\..\.." Timeout="25000" ContinueOnError="true">
 			<Output TaskParameter="Revision" PropertyName="Revision" />
 			<Output TaskParameter="Changeset" PropertyName="Changeset" />
 		</HgVersion>
+
+		<GitVersion LocalPath="" Condition="$(Changeset) == ''" ContinueOnError="true">
+			<Output TaskParameter="Changeset" PropertyName="Changeset" />
+		</GitVersion>
 						
-		<Message Text="Last revision from HG: $(Revision) $(Changeset) - calculated version $(VersionNumber)"/>    
+		<Message Text="Last revision from DVCS: $(Revision) $(Changeset) - calculated version $(VersionNumber)"/>    
 
 		<ItemGroup>
 			<Lines Include="//~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=" />
