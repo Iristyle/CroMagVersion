@@ -7,6 +7,7 @@ CroMag helps to version all of the projects within a solution via a single file 
 ## Requirements
 
 * Nuget
+* Package restore via [PepitaGet](http://code.google.com/p/pepita/) (or Nuget) highly recommended
 * MSBuild 4 or higher (uses static property functions)
 
 ## What does it do?
