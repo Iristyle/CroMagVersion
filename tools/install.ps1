@@ -27,13 +27,14 @@ if (! ($versionPropsExists))
 }
 
 #link in sharedAssemblyInfo to the project
+$sharedAssemblyInfo = Join-Path $toolsPath 'SharedAssemblyInfo.cs'
+'' | Out-File $sharedAssemblyInfo
 $propertiesFolder = $project.ProjectItems.Item('Properties')
 $sharedExists = ($propertiesFolder.ProjectItems | ? { $_.Name -ieq 'SharedAssemblyInfo.cs' } | 
     Measure-Object | Select -ExpandProperty Count) -gt 0
 
 if (! ($sharedExists))
-{
-    $sharedAssemblyInfo = Join-Path $toolsPath 'SharedAssemblyInfo.cs'
+{    
     $propertiesFolder.ProjectItems.AddFromFile($sharedAssemblyInfo)
     Write-Host "Added link to SharedAssemblyInfo.cs."
 }
