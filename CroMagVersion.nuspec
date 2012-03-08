@@ -2,8 +2,8 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>CroMagVersion</id>
-    <version>0.1.0.0</version>
-    <title>Cro-Magnon (date based) style versioning semantics in an open-source package.</title>
+    <version>0.1.0.1</version>
+    <title>Cro-Magnon - Simple Automatic Versioning</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>    
     <summary>An MSBuild project integration that makes it easy to keep version numbers synced across all projects in a solution based on a simple date scheme and user provided major / minor version numbers.</summary>
