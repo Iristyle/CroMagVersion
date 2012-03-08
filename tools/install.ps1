@@ -46,8 +46,6 @@ $attribRegex = '^([^//].*(AssemblyCompany|AssemblyCopyright|AssemblyConfiguratio
 (Get-Content $existingAssemblyInfoPath) -ireplace $attribRegex, '//$1' | Out-File $existingAssemblyInfoPath -Encoding UTF8
 Write-Host "Commented relevant sections of $existingAssemblyInfoPath."
 
-$project.Save($project.FullName)
-
 Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
 $msbuild = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.GetLoadedProjects($project.FullName) | Select-Object -First 1
@@ -76,3 +74,4 @@ if (! ($importExists))
     Write-Host "Added import of '$($relativePath)'."
 }
 
+$project.Save($project.FullName)
