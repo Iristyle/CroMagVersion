@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project ToolsVersion="4.0" DefaultTargets="Version" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<!--Jenkins sets BUILD_NUMBER -->
+		<Build>$(BUILD_NUMBER)</Build>
+		<Build Condition="$(Build) == ''">0</Build><!-- set to 0 outside of CI -->
+		<!-- ensure we use only up to the last 3 characters of the build_number so we don't overrun 65536 -->
+		<Build Condition="$(Build.Length) > 3">$(Build.Substring($([MSBuild]::Subtract($(Build.Length), 3))))</Build>
+		<Revision>0</Revision>
+		<Configuration Condition="$(Configuration) == ''">Unspecified</Configuration>
+		<MSBuildMercurialTasksPath>$(MsBuildThisFileDirectory)</MSBuildMercurialTasksPath>
+		<AsmInfoPath>$(MSBuildThisFileDirectory)\SharedAssemblyInfo.cs</AsmInfoPath>
+	</PropertyGroup>  
+	
+	<!-- TODO: consider removing this as an import so VS builds cleanly without closing sln / reopening -->
+	<Import Project="$(SolutionDir)\version.props" />
+	<Import Project="$(MSBuildMercurialTasksPath)\MSBuild.Mercurial.tasks"/>
+
+	<Target Name="Version" Returns="$(VersionNumber);$(Changeset);$(BuildVersion);$(RevisionVersion)" BeforeTargets="Build">
+		<Error Condition="$(MajorVersion) == ''" Text="MajorVersion must be entered into the version.props file" />
+		<Error Condition="$(MinorVersion) == ''" Text="MinorVersion must be entered into the version.props file" />
+		<Error Condition="$(VersionCompany) == ''" Text="VersionCompany must be entered into the version.props file" />
+		<Error Condition="$(VersionCompanyUrl) == ''" Text="VersionCompanyUrl must be entered into the version.props file" />
+		<Message Text="Calculating Version Information..."/>		
+
+		<PropertyGroup>
+			<YearMonth>$([System.DateTime]::UtcNow.ToString(`yyMM`))</YearMonth>
+			<DayNumber>$([System.DateTime]::UtcNow.ToString(`dd`))</DayNumber>
+			<Year>$([System.DateTime]::UtcNow.ToString(`yyyy`))</Year>
+			<!-- each aspect of version is limited to 65536, so we have to be crafty with how we cook this up -->
+			<BuildVersion>$(YearMonth)</BuildVersion>
+			<RevisionVersion>$(DayNumber)$(Build)</RevisionVersion>
+			<VersionNumber>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</VersionNumber>
+		</PropertyGroup>
+
+		<!-- TODO: this busts when we're not Hg -->
+		<!-- TODO: integrate Git -->
+		<HgVersion LocalPath="$(MSBuildThisFileDirectory)\..\.." Timeout="25000">
+			<Output TaskParameter="Revision" PropertyName="Revision" />
+			<Output TaskParameter="Changeset" PropertyName="Changeset" />
+		</HgVersion>
+						
+		<Message Text="Last revision from HG: $(Revision) $(Changeset) - calculated version $(VersionNumber)"/>    
+
+		<ItemGroup>
+			<Lines Include="using System%3B" />
+			<Lines Include="using System.Reflection%3B" />
+			<Lines Include="using System.Resources%3B" />
+			<Lines Include="[assembly: AssemblyCompany(&quot;$(VersionCompany) $(VersionCompanyUrl)&quot;)]" />
+			<Lines Include="[assembly: AssemblyCopyright(&quot;Copyright &#169; $(Year) $(VersionCompany)&quot;)]" />
+			<Lines Include="[assembly: AssemblyConfiguration(&quot;$(Configuration) - $(Changeset)&quot;)]" />
+			<Lines Include="[assembly: AssemblyVersion(&quot;$(VersionNumber)&quot;)]" />
+			<Lines Include="[assembly: AssemblyFileVersion(&quot;$(VersionNumber)&quot;)]" />
+			<Lines Include="[assembly: AssemblyInformationalVersion(&quot;$(VersionNumber)&quot;)]" />
+		</ItemGroup>
+
+		<!-- TODO: find a way to include other stuff in version.props for the shared asm info
+		[assembly: AssemblyTrademark("" "")]
+		[assembly: CLSCompliant(true)]
+		[assembly: NeutralResourcesLanguage("en")]
+		[assembly: CodeLanguage("CS")]
+		-->
+		<WriteLinesToFile File="$(AsmInfoPath)" Lines="@(Lines)" Overwrite="true" />
+	</Target> 
+</Project>
