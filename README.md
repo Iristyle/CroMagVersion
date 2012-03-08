@@ -51,19 +51,12 @@ $(MajorVersion).$(MinorVersion).$(YearMonth).$(DayNumber)$(Build)
 
 Is this the best way to date tag a build?  Not necessarily, but it's a pretty reasonable solution that results in something human readable after the fact.
 
-## Limitations
-
-Unfortunately, Visual Studio does not keep tabs on any imports within an msbuild file.  That means that each time ```version.props``` is edited, the solution inside Visual Studio will have to be manually closed / re-opened for the changes to take effect in the build output.
-
-This is a non-issue for build servers (which is what this package is really about in the first place), but something to be aware of while working inside Visual Studio nonetheless.
-
 ## Similar Projects
 
 * [SemVerHarvester](https://github.com/jennings/SemVerHarvester) - MSBuild task library that harvests version numbers from tags in source control versions.  It appears to work with both Git and Mercurial.
 
 ## Future Improvements
 
-* Find a work around / alternative to loading ```version.props``` via a standard MSBuild import, so that there is no VS caching.  A straight read from disk as XML is probably a perfectly acceptable solution to this problem.
 * Add Git support
 * Ensure Mono works properly
 

@@ -12,15 +12,31 @@
 		<AsmInfoPath>$(MSBuildThisFileDirectory)\SharedAssemblyInfo.cs</AsmInfoPath>
 	</PropertyGroup>  
 	
-	<!-- TODO: consider removing this as an import so VS builds cleanly without closing sln / reopening -->
-	<Import Project="$(SolutionDir)\version.props" />
 	<Import Project="$(MSBuildMercurialTasksPath)\MSBuild.Mercurial.tasks"/>
 
 	<Target Name="Version" Returns="$(VersionNumber);$(Changeset);$(BuildVersion);$(RevisionVersion)" BeforeTargets="Build">
-		<Error Condition="$(MajorVersion) == ''" Text="MajorVersion must be entered into the version.props file" />
-		<Error Condition="$(MinorVersion) == ''" Text="MinorVersion must be entered into the version.props file" />
-		<Error Condition="$(VersionCompany) == ''" Text="VersionCompany must be entered into the version.props file" />
-		<Error Condition="$(VersionCompanyUrl) == ''" Text="VersionCompanyUrl must be entered into the version.props file" />
+		<PropertyGroup>
+			<MSBuildNamespace>&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003'/&gt;</MSBuildNamespace>
+		</PropertyGroup>
+		<ItemGroup>
+			<Nodes Include="MajorVersion;MinorVersion;VersionCompany;VersionCompanyUrl" />
+		</ItemGroup>
+
+		<XmlPeek Namespaces="$(MSBuildNamespace)"
+			XmlInputPath="$(SolutionDir)\version.props"
+			Query="/msb:Project/msb:PropertyGroup/msb:%(Nodes.Identity)/text()">
+			<Output TaskParameter="Result" ItemName="%(Nodes.Identity)" />
+		</XmlPeek>
+
+		<!-- flatten the item lists to strings -->
+		<PropertyGroup>
+			<MajorVersion>@(MajorVersion)</MajorVersion>
+			<MinorVersion>@(MinorVersion)</MinorVersion>
+			<VersionCompany>@(VersionCompany)</VersionCompany>
+			<VersionCompanyUrl>@(VersionCompanyUrl)</VersionCompanyUrl>
+		</PropertyGroup>
+
+		<Error Condition="$(%(Nodes.Identity)) == ''" Text="%(Nodes.Identity) must be entered into the version.props file" />
 		<Message Text="Calculating Version Information..."/>		
 
 		<PropertyGroup>
