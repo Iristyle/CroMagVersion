@@ -24,22 +24,12 @@ if (! ($versionPropsExists))
 {
     $buildFolder.ProjectItems.AddFromFile($versionProps)  
     Write-Host "Added $versionProps to solution folder."  
+    $dte.ItemOperations.OpenFile($versionProps)
 }
 
-#link in sharedAssemblyInfo to the project
-$sharedAssemblyInfo = Join-Path $toolsPath 'SharedAssemblyInfo.cs'
-'' | Out-File $sharedAssemblyInfo
-$propertiesFolder = $project.ProjectItems.Item('Properties')
-$sharedExists = ($propertiesFolder.ProjectItems | ? { $_.Name -ieq 'SharedAssemblyInfo.cs' } | 
-    Measure-Object | Select -ExpandProperty Count) -gt 0
-
-if (! ($sharedExists))
-{    
-    $propertiesFolder.ProjectItems.AddFromFile($sharedAssemblyInfo)
-    Write-Host "Added link to SharedAssemblyInfo.cs."
-}
 
 #comment stuff we'll share out of existing AssemblyInfo.cs
+$propertiesFolder = $project.ProjectItems.Item('Properties')
 $existingAssemblyInfo = $propertiesFolder.ProjectItems.Item('AssemblyInfo.cs')
 $existingAssemblyInfoPath = Join-Path ([IO.Path]::GetDirectoryName($project.FullName)) 'Properties\AssemblyInfo.cs'
 $attribRegex = '^([^//].*(AssemblyCompany|AssemblyCopyright|AssemblyConfiguration|AssemblyVersion|AssemblyFileVersion|AssemblyInformationalVersion).*)$'
@@ -54,7 +44,7 @@ $targetsFile = Join-Path $toolsPath $targetsFileName
 
 # Make the path to the targets file relative.
 $projectUri = New-Object Uri("file://$($project.FullName)")
-$targetUri = New-Object Uri("file://$($targetsFile)")
+$targetUri = New-Object Uri("file://$($toolsPath)")
 $relativePath = $projectUri.MakeRelativeUri($targetUri).ToString() -replace [IO.Path]::AltDirectorySeparatorChar, [IO.Path]::DirectorySeparatorChar
 
 #update targets path
@@ -69,9 +59,27 @@ Measure-Object | Select -ExpandProperty Count) -gt 0
 
 if (! ($importExists))
 {
-    $import = $msbuild.Xml.AddImport("`$($($package.Id))")
-    $import.Condition = "Exists(`$($($package.Id)))"
-    Write-Host "Added import of '$($relativePath)'."
+    $targetsPath = "`$($($package.Id))\$($package.Id).targets"
+    $import = $msbuild.Xml.AddImport($targetsPath)
+    $import.Condition = "Exists('$targetsPath')"
+    Write-Host "Added import of '$targetsPath'."
+}
+
+
+#link in sharedAssemblyInfo to the project
+$sharedAssemblyInfo = Join-Path $toolsPath 'SharedAssemblyInfo.cs'
+'' | Out-File $sharedAssemblyInfo
+
+$sharedExists = ($msbuild.Xml.Items | 
+    ? { $_.Include -imatch "`$($($package.Id))`\SharedAssemblyInfo.cs" } |
+    Measure-Object | Select -ExpandProperty Count) -gt 0
+
+if (! ($sharedExists))
+{    
+    $include = $msbuild.Xml.AddItem("Compile", "`$($($package.Id))`\SharedAssemblyInfo.cs")
+    $include.AddMetadata('Link','Properties\SharedAssemblyInfo.cs')
+    #$propertiesFolder.ProjectItems.AddFromFile($sharedAssemblyInfo)
+    Write-Host "Added link to SharedAssemblyInfo.cs."
 }
 
 $project.Save($project.FullName)
