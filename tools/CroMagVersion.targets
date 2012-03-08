@@ -61,7 +61,7 @@
 
 		<!-- TODO: this busts when we're not Hg -->
 		<!-- TODO: integrate Git -->
-		<HgVersion LocalPath="$(MSBuildThisFileDirectory)\..\.." Timeout="25000">
+		<HgVersion LocalPath="$(MSBuildThisFileDirectory)\..\.." Timeout="25000" ContinueOnError="true">
 			<Output TaskParameter="Revision" PropertyName="Revision" />
 			<Output TaskParameter="Changeset" PropertyName="Changeset" />
 		</HgVersion>
