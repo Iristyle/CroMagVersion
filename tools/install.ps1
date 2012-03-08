@@ -43,7 +43,7 @@ if (! ($sharedExists))
 $existingAssemblyInfo = $propertiesFolder.ProjectItems.Item('AssemblyInfo.cs')
 $existingAssemblyInfoPath = Join-Path ([IO.Path]::GetDirectoryName($project.FullName)) 'Properties\AssemblyInfo.cs'
 $attribRegex = '^([^//].*(AssemblyCompany|AssemblyCopyright|AssemblyConfiguration|AssemblyVersion|AssemblyFileVersion|AssemblyInformationalVersion).*)$'
-(Get-Content $existingAssemblyInfoPath) -ireplace $attribRegex, '//$1' | Out-File $existingAssemblyInfoPath
+(Get-Content $existingAssemblyInfoPath) -ireplace $attribRegex, '//$1' | Out-File $existingAssemblyInfoPath -Encoding UTF8
 Write-Host "Commented relevant sections of $existingAssemblyInfoPath."
 
 $project.Save($project.FullName)
