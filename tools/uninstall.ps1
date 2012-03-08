@@ -9,7 +9,6 @@ $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
 #reference from 'Build' folder
 $projectsWithRefs = Get-Project -All | 
     % { [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.GetLoadedProjects($_.FullName) } | 
-    Select-Object -First 1 |
     ? { ($_.Xml.Properties | ? { $_.Name -ieq $package.Id } | Measure-Object | Select -ExpandProperty Count) -gt 0 }
 $projectsWithRefsCount = ($projectsWithRefs | Measure-Object | Select -ExpandProperty Count)
 Write-Host "Found $projectsWithRefsCount projects using CroMagVersion."  
@@ -36,7 +35,7 @@ if (($projectsWithRefsCount -eq 1) -and ($buildFolder -ne $null))
 #but if we're last man standing, we must do this to allow packages folder to be deleted
 $sharedAssemblyInfo = Join-Path $toolsPath 'SharedAssemblyInfo.cs'
 
-del $sharedAssemblyInfo
+del $sharedAssemblyInfo -ErrorAction SilentlyContinue
 Write-Host "Deleted $sharedAssemblyInfo"
 
 #launch an editor for a user to undo changes to AssemblyInfo.cs 
