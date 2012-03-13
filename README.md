@@ -56,7 +56,7 @@ Is this the best way to date tag a build?  Not necessarily, but it's a pretty re
 
 ## Customizing The Layout
 
-```AssemblyFileVersion``` and ```AssemblyInformationalVersion``` can have customized layouts by enabling ```AssemblyFileVersionLayout``` or ```AssemblyInformationalVersionLayout``` in ```version.props``` .  This may be necessary to deal with wacky installers (like MSI) that don't consider a bump to the 3rd number significant enough to upgrade an existing product install.  Sigh...
+```AssemblyFileVersion``` and ```AssemblyInformationalVersion``` can have customized layouts by enabling ```AssemblyFileVersionLayout``` or ```AssemblyInformationalVersionLayout``` in ```version.props``` .  This may be necessary to deal with wacky installers (like MSI) that don't consider a bump to the 4th number significant enough to upgrade an existing product install.  Sigh...
 
 The following is pretty self-explanatory:
 
@@ -87,7 +87,7 @@ The following is pretty self-explanatory:
 -->
 ```
 
-## A note about naming conventions
+## A note about naming conventions for version pieces
 
 This project follows the standard .NET style naming convention specified by [System.Version](http://msdn.microsoft.com/en-us/library/system.version.aspx) of Major.Minor.Build.Revision, where the 3rd and 4th numbers are Build and Revision.
 
