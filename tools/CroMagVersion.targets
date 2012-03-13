@@ -61,16 +61,13 @@
 
 
 	<Target Name="Version" Returns="$(VersionNumber);$(Changeset);$(BuildVersion);$(RevisionVersion)" BeforeTargets="Build">
-		<PropertyGroup>
-			<MSBuildNamespace>&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003'/&gt;</MSBuildNamespace>
-		</PropertyGroup>
 		<ItemGroup>
 			<Nodes Include="MajorVersion;MinorVersion;VersionCompany;VersionCompanyUrl;BUILD_NUMBER" />
 		</ItemGroup>
 
-		<XmlPeek Namespaces="$(MSBuildNamespace)"
+		<XmlPeek
 			XmlInputPath="$(SolutionDir)\version.props"
-			Query="/msb:Project/msb:PropertyGroup/msb:%(Nodes.Identity)/text()">
+			Query="/VersioningScheme/%(Nodes.Identity)/text()">
 			<Output TaskParameter="Result" ItemName="%(Nodes.Identity)" />
 		</XmlPeek>
 
