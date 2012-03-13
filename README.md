@@ -92,6 +92,7 @@ The following is pretty self-explanatory:
 This project follows the standard .NET style naming convention specified by [System.Version](http://msdn.microsoft.com/en-us/library/system.version.aspx) of Major.Minor.Build.Revision, where the 3rd and 4th numbers are Build and Revision.
 
 Other systems tend to use different schemes:
+
 * Major.Minor.Revision.Build - common many places, including, Java
 * Major.Minor.Patch - for instance [SemVer](http://semver.org/)
 * Major.Minor.Build, for instance MSI [ProductVersion](http://msdn.microsoft.com/en-us/library/windows/desktop/aa370859\(v=vs.85\).aspx).
