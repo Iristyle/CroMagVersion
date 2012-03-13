@@ -11,6 +11,7 @@ CroMag helps to version all of the projects within a solution via a single file 
 * MSBuild 4 or higher (uses static property functions)
 * To have the current short SHA1 hash added to AssemblyConfiguration, you must be using Mercurial or Git
 
+
 ## What does it do?
 
 CroMagVersion allows projects to share the following assembly attributes:
@@ -20,8 +21,8 @@ CroMagVersion allows projects to share the following assembly attributes:
 * [AssemblyConfiguration](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyconfigurationattribute.aspx) - Annotated with build Configuration (i.e. Debug, Release) and the SHA1 hash of the current source version
 
 * [AssemblyVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyversionattribute.aspx) - Calculates date convention based version
-* [AssemblyFileVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyfileversionattribute.aspx) - Calculates date convention based version
-* [AssemblyInformationalVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyinformationalversionattribute.aspx) - Calculates date convention based version
+* [AssemblyFileVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyfileversionattribute.aspx) - Calculates date convention based version by default, but the layout can be customized (see below)
+* [AssemblyInformationalVersion](http://msdn.microsoft.com/en-us/library/system.reflection.assemblyinformationalversionattribute.aspx) - Calculates date convention based version, but the layout can be customized (see below)
 
 ## How does it work?
 
@@ -40,6 +41,7 @@ CroMagVersion allows projects to share the following assembly attributes:
 -->
 ```
 
+
 * A ```CroMagVersion.targets``` file is injected into the project as an [Import](http://msdn.microsoft.com/en-us/library/92x05xfs.aspx) that contains the version update code
 
 * Before the build goes down, ```SharedAssemblyInfo.cs``` file is updated with the major / minor version from ```version.props``` and has date based version information added in the following format:
@@ -51,6 +53,50 @@ $(MajorVersion).$(MinorVersion).$(YearMonth).$(DayNumber)$(Build)
 
 
 Is this the best way to date tag a build?  Not necessarily, but it's a pretty reasonable solution that results in something human readable after the fact.
+
+## Customizing The Layout
+
+```AssemblyFileVersion``` and ```AssemblyInformationalVersion``` can have customized layouts by enabling ```AssemblyFileVersionLayout``` or ```AssemblyInformationalVersionLayout``` in ```version.props``` .  This may be necessary to deal with wacky installers (like MSI) that don't consider a bump to the 3rd number significant enough to upgrade an existing product install.  Sigh...
+
+The following is pretty self-explanatory:
+
+```xml
+<!-- Available variables for a custom layout are:
+	$(MajorVersion) - from this file
+	$(MinorVersion) - from this file
+	$(BUILD_NUMBER) - original number from build server / environment variable if available, otherwise 0, unless overriden in this file
+	$(Build) - BUILD_NUMBER truncated to last 3 digits
+	$(YearMonth) - yyMM
+	$(DayNumber) - dd
+	$(Year) - yyyy
+
+	$(BuildVersion) - $(YearMonth)
+	$(RevisionVersion) - $(DayNumber)$(Build)
+
+	$(VersionNumber) - $(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)
+
+	Note that these are NOT proper MSBuild variables, and therefore
+	arbitrary variables will not resolve.  Only these whitelisted
+	variables will do anything.  All other strings, valid or not,
+	will be treated as plaintext.
+-->
+
+<!--
+<AssemblyFileVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
+<AssemblyInformationalVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyInformationalVersionLayout>
+-->
+```
+
+## A note about naming conventions
+
+This project follows the standard .NET style naming convention specified by [System.Version](http://msdn.microsoft.com/en-us/library/system.version.aspx) of Major.Minor.Build.Revision, where the 3rd and 4th numbers are Build and Revision.
+
+Other systems tend to use different schemes:
+* Major.Minor.Revision.Build - common many places, including, Java
+* Major.Minor.Patch - for instance [SemVer](http://semver.org/)
+* Major.Minor.Build, for instance MSI [ProductVersion](http://msdn.microsoft.com/en-us/library/windows/desktop/aa370859\(v=vs.85\).aspx).
+
+The names for the slots aren't important so much as the semantics.
 
 ## Similar Projects
 
