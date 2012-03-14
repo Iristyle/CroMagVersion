@@ -60,7 +60,7 @@
 	</UsingTask>
 
 
-	<Target Name="Version" Returns="$(VersionNumber);$(Changeset);$(BuildVersion);$(RevisionVersion)" BeforeTargets="Build">
+	<Target Name="Version" Returns="$(VersionNumber);$(Changeset);$(BuildVersion);$(RevisionVersion)" BeforeTargets="CoreCompile">
 		<ItemGroup>
 			<Nodes Include="MajorVersion;MinorVersion;VersionCompany;VersionCompanyUrl;BUILD_NUMBER;AssemblyFileVersionLayout;AssemblyInformationalVersionLayout" />
 		</ItemGroup>
