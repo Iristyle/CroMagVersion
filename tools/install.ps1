@@ -1,5 +1,25 @@
 param($installPath, $toolsPath, $package, $project)
 
+#recursive search project for a given file name and return its project relative path
+function Get-RelativeFilePath
+{
+    param($projectItems, $fileName)
+
+    $match = $projectItems | ? { $_.Name -eq $fileName } |
+        Select -First 1
+
+    if ($null -ne $match) { return $match.Name }
+
+    $projectItems | ? { $_.Kind -eq '{6BB5F8EF-4483-11D3-8BCF-00C04F8EC28C}' } |
+        % { 
+            $match = Get-RelativeFilePath $_.ProjectItems $fileName 
+            if ($null -ne $match)
+            {
+                return (Join-Path $_.Name $match)
+            }
+        }
+}
+
 $targetsFileName = 'CroMagVersion.targets'
 
 #copy version.props to same directory as solution
@@ -27,14 +47,14 @@ if (! ($versionPropsExists))
     $dte.ItemOperations.OpenFile($versionProps)
 }
 
-
 #comment stuff we'll share out of existing AssemblyInfo.cs
-$propertiesFolder = $project.ProjectItems.Item('Properties')
-$existingAssemblyInfo = $propertiesFolder.ProjectItems.Item('AssemblyInfo.cs')
-$existingAssemblyInfoPath = Join-Path ([IO.Path]::GetDirectoryName($project.FullName)) 'Properties\AssemblyInfo.cs'
-$attribRegex = '^([^//].*(AssemblyCompany|AssemblyCopyright|AssemblyConfiguration|AssemblyVersion|AssemblyFileVersion|AssemblyInformationalVersion).*)$'
-(Get-Content $existingAssemblyInfoPath) -ireplace $attribRegex, '//$1' | Out-File $existingAssemblyInfoPath -Encoding UTF8
-Write-Host "Commented relevant sections of $existingAssemblyInfoPath."
+$existingAssemblyInfoPath = Join-Path ([IO.Path]::GetDirectoryName($project.FullName)) (Get-RelativeFilePath $project.ProjectItems 'AssemblyInfo.cs')
+if (($existingAssemblyInfoPath -imatch 'AssemblyInfo.cs') -and (Test-Path $existingAssemblyInfoPath))
+{
+    $attribRegex = '^([^//].*(AssemblyCompany|AssemblyCopyright|AssemblyConfiguration|AssemblyVersion|AssemblyFileVersion|AssemblyInformationalVersion).*)$'
+    (Get-Content $existingAssemblyInfoPath) -ireplace $attribRegex, '//$1' | Out-File $existingAssemblyInfoPath -Encoding UTF8
+    Write-Host "Commented relevant sections of $existingAssemblyInfoPath."
+}
 
 Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
@@ -79,7 +99,6 @@ if (! ($sharedExists))
 {    
     $include = $msbuild.Xml.AddItem("Compile", $sharedAssemblyInfoPath)
     $include.AddMetadata('Link','Properties\SharedAssemblyInfo.cs')
-    #$propertiesFolder.ProjectItems.AddFromFile($sharedAssemblyInfo)
     Write-Host "Added link to SharedAssemblyInfo.cs."
 }
 

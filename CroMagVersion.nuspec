@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>CroMagVersion</id>
-    <version>0.2.0.0</version>
+    <version>0.2.1.0</version>
     <title>Cro-Magnon - Simple Automatic Versioning</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>    
@@ -12,6 +12,7 @@
     <releaseNotes>
         * Removed MSBuild-y ness from version.props since its extraneous and confuses things (breaking change)
         * Added ability to override FileVersion and AssemblyInformationalVersion versions with a custom layout given a few well known variables
+        * Able to find AssemblyInfo.cs in locations other than Properties folder
         </releaseNotes>
     <projectUrl>https://github.com/EastPoint/CroMagVersion</projectUrl>    
     <licenseUrl>https://github.com/EastPoint/CroMagVersion/blob/master/LICENSE.md</licenseUrl>
