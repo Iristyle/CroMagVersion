@@ -42,7 +42,7 @@ CroMagVersion allows projects to share the following assembly attributes:
 ```
 
 
-* A ```CroMagVersion.targets``` file is injected into the project as an [Import](http://msdn.microsoft.com/en-us/library/92x05xfs.aspx) that contains the version update code
+* A ```CroMagVersion.targets``` file is injected into the project as an [Import](http://msdn.microsoft.com/en-us/library/92x05xfs.aspx) that contains the version update code.  It is added as a Build and Rebuild dependency by overriding [DependsOn](http://msdn.microsoft.com/en-us/library/ms366724\(v=vs.100\).aspx)
 
 * Before the build goes down, ```SharedAssemblyInfo.cs``` file is updated with the major / minor version from ```version.props``` and has date based version information added in the following format:
 $(MajorVersion).$(MinorVersion).$(YearMonth).$(DayNumber)$(Build)
