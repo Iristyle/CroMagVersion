@@ -131,19 +131,19 @@
 		<Message Text="Last revision from DVCS: $(Revision) $(Changeset) - calculated version $(VersionNumber)"/>    
 
 		<ItemGroup>
-			<Lines Include="//~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=" />
-			<Lines Include="//DANGER WILL ROBINSON - TOOL GENERATED FILE - DO NOT MODIFY THIS FILE BY HAND!" />
-			<Lines Include="//USE THE SOLUTIONS VERSION.PROPS TO TWEAK MINOR / MAJOR VERSIONS" />
-			<Lines Include="//~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=" />
-			<Lines Include="using System%3B" />
-			<Lines Include="using System.Reflection%3B" />
-			<Lines Include="using System.Resources%3B" />
-			<Lines Include="[assembly: AssemblyCompany(&quot;$(VersionCompany) $(VersionCompanyUrl)&quot;)]" />
-			<Lines Include="[assembly: AssemblyCopyright(&quot;Copyright &#169; $(Year) $(VersionCompany)&quot;)]" />
-			<Lines Include="[assembly: AssemblyConfiguration(&quot;$(Configuration) - $(Changeset)&quot;)]" />
-			<Lines Include="[assembly: AssemblyVersion(&quot;$(VersionNumber)&quot;)]" />
-			<Lines Include="[assembly: AssemblyFileVersion(&quot;$(AssemblyFileVersionLayout.Trim())&quot;)]" />
-			<Lines Include="[assembly: AssemblyInformationalVersion(&quot;$(AssemblyInformationalVersionLayout.Trim())&quot;)]" />
+			<AssemblyInfoLines Include="//~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=" />
+			<AssemblyInfoLines Include="//DANGER WILL ROBINSON - TOOL GENERATED FILE - DO NOT MODIFY THIS FILE BY HAND!" />
+			<AssemblyInfoLines Include="//USE THE SOLUTIONS VERSION.PROPS TO TWEAK MINOR / MAJOR VERSIONS" />
+			<AssemblyInfoLines Include="//~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=" />
+			<AssemblyInfoLines Include="using System%3B" />
+			<AssemblyInfoLines Include="using System.Reflection%3B" />
+			<AssemblyInfoLines Include="using System.Resources%3B" />
+			<AssemblyInfoLines Include="[assembly: AssemblyCompany(&quot;$(VersionCompany) $(VersionCompanyUrl)&quot;)]" />
+			<AssemblyInfoLines Include="[assembly: AssemblyCopyright(&quot;Copyright &#169; $(Year) $(VersionCompany)&quot;)]" />
+			<AssemblyInfoLines Include="[assembly: AssemblyConfiguration(&quot;$(Configuration) - $(Changeset)&quot;)]" />
+			<AssemblyInfoLines Include="[assembly: AssemblyVersion(&quot;$(VersionNumber)&quot;)]" />
+			<AssemblyInfoLines Include="[assembly: AssemblyFileVersion(&quot;$(AssemblyFileVersionLayout.Trim())&quot;)]" />
+			<AssemblyInfoLines Include="[assembly: AssemblyInformationalVersion(&quot;$(AssemblyInformationalVersionLayout.Trim())&quot;)]" />
 		</ItemGroup>
 
 		<!-- TODO: find a way to include other stuff in version.props for the shared asm info
@@ -152,6 +152,6 @@
 		[assembly: NeutralResourcesLanguage("en")]
 		[assembly: CodeLanguage("CS")]
 		-->
-		<WriteLinesToFile File="$(AsmInfoPath)" Lines="@(Lines)" Overwrite="true" />
+		<WriteLinesToFile File="$(AsmInfoPath)" Lines="@(AssemblyInfoLines)" Overwrite="true" />
 	</Target> 
 </Project>
