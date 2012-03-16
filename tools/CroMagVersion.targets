@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Project ToolsVersion="4.0" DefaultTargets="Version" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="CroMagVersion" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
 		<!--Jenkins sets BUILD_NUMBER -->
 		<Build>$(BUILD_NUMBER)</Build>
@@ -60,7 +60,7 @@
 	</UsingTask>
 
 
-	<Target Name="Version" Returns="$(VersionNumber);$(Changeset);$(BuildVersion);$(RevisionVersion)" BeforeTargets="CoreCompile">
+	<Target Name="CroMagVersion" Returns="$(VersionNumber);$(Changeset);$(BuildVersion);$(RevisionVersion)" BeforeTargets="CoreCompile">
 		<ItemGroup>
 			<Nodes Include="MajorVersion;MinorVersion;VersionCompany;VersionCompanyUrl;BUILD_NUMBER;AssemblyFileVersionLayout;AssemblyInformationalVersionLayout" />
 		</ItemGroup>
