@@ -1,0 +1,185 @@
+﻿<#@ template language="C#" hostspecific="true" #>
+<#@ output extension=".cs" #>
+<#@ assembly name="System.Xml.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Xml" #>
+//~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
+//DANGER WILL ROBINSON - TOOL GENERATED FILE - DO NOT MODIFY THIS FILE BY HAND!
+//USE THE SOLUTIONS VERSION.PROPS TO TWEAK MINOR / MAJOR VERSIONS
+//~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
+using System;
+using System.Reflection;
+using System.Resources;
+<# WriteAttributes(); #>
+<#+
+private void WriteAttributes()
+{
+  var localPath = Path.GetDirectoryName(Host.TemplateFile);
+
+  string SolutionDir = Path.Combine(localPath, "..\\..\\.."), //VS default
+    Configuration = "Unspecified";
+
+  try { SolutionDir = Host.ResolveParameterValue("", "", "SolutionDir"); }
+    catch { }
+  try { Configuration = Host.ResolveParameterValue("", "", "Configuration"); }
+    catch { }
+
+  XmlDocument doc = new XmlDocument();
+  doc.Load(Path.Combine(SolutionDir, "version.props"));
+  var root = doc.SelectSingleNode("VersioningScheme");
+
+  Dictionary<string, string> validTokens = new Dictionary<string, string>()
+  {
+    //typically set by build server, will end up being, in this order:
+    //  - Override BUILD_NUMBER specified in version.props if present
+    //  - BUILD_NUMBER env variable as specified by a build server like Jenkins
+    //  - 0 if not specified
+    { "Build", MaxLength(GetNode(root, "BUILD_NUMBER/text()", false)
+      //use only up to the last 3 characters so we don't overrun 65536
+      ?? Environment.GetEnvironmentVariable("BUILD_NUMBER") ?? "0", 3) },
+    { "Revision", "0" },
+    { "Configuration", Configuration },
+    { "Changeset", HgVersion(localPath) ?? GitVersion(localPath) ?? string.Empty },
+    { "YearMonth", DateTime.UtcNow.ToString("yyMM") },
+    { "DayNumber", DateTime.UtcNow.ToString("dd") },
+    { "Year", DateTime.UtcNow.ToString("yyyy") },
+    //mandatory
+    { "MajorVersion", GetNode(root, "MajorVersion/text()", true) },
+    { "MinorVersion", GetNode(root, "MinorVersion/text()", true) },
+    { "VersionCompany", GetNode(root, "VersionCompany/text()", true) },
+    { "VersionCompanyUrl", GetNode(root, "VersionCompanyUrl/text()", true) },
+  };
+
+  //variables defined for consumption
+  //each segment is limited to 65536, so cook craftily
+  validTokens.Add("BuildVersion", validTokens["YearMonth"]);
+  validTokens.Add("RevisionVersion", validTokens["DayNumber"] +
+    validTokens["Build"]);
+  validTokens.Add("VersionNumber", string.Format("{0}.{1}.{2}.{3}",
+    validTokens["MajorVersion"], validTokens["MinorVersion"],
+    validTokens["BuildVersion"], validTokens["RevisionVersion"]));
+
+  string AssemblyFileVersionLayout =
+    GetNode(root, "AssemblyFileVersionLayout/text()", false)
+    ?? validTokens["VersionNumber"],
+  AssemblyInformationalVersionLayout =
+    GetNode(root, "AssemblyInformationalVersionLayout/text()", false)
+    ?? validTokens["VersionNumber"];
+
+  // search replace msbuild style tokens that a user might incorporate
+  if (AssemblyFileVersionLayout != validTokens["VersionNumber"])
+  {
+    AssemblyFileVersionLayout = ReplaceTokens(AssemblyFileVersionLayout, validTokens)
+      .Trim();
+  }
+  if (AssemblyInformationalVersionLayout != validTokens["VersionNumber"])
+  {
+    AssemblyInformationalVersionLayout =
+      ReplaceTokens(AssemblyInformationalVersionLayout, validTokens).Trim();
+  }
+#>
+
+[assembly: AssemblyCompany("<#= validTokens["VersionCompany"] #> <#= validTokens["VersionCompanyUrl"] #>")]
+[assembly: AssemblyCopyright("Copyright © <#= validTokens["Year"] #> <#= validTokens["VersionCompany"] #>")]
+[assembly: AssemblyConfiguration("<#= validTokens["Configuration"] #> - <#= validTokens["Changeset"] #>")]
+[assembly: AssemblyVersion("<#= validTokens["VersionNumber"] #>")]
+[assembly: AssemblyFileVersion("<#= AssemblyFileVersionLayout.Trim() #>")]
+[assembly: AssemblyInformationalVersion("<#= AssemblyInformationalVersionLayout.Trim() #>")]
+<#+
+
+//TODO: find a way to include other stuff in version.props for the shared asm info
+//[assembly: AssemblyTrademark("" "")]
+//[assembly: CLSCompliant(true)]
+//[assembly: NeutralResourcesLanguage("en")]
+//[assembly: CodeLanguage("CS")]
+
+}
+
+  private string MaxLength(string s, int length)
+  {
+    if (s.Length > 3) { return s.Substring(s.Length - 3); }
+    return s;
+  }
+
+  private string GetNode(XmlNode node, string xpath, bool @throw)
+  {
+    var child = node.SelectSingleNode(xpath);
+    if (child == null)
+    {
+      if (!@throw) { return null; }
+      this.Error("Value at " + xpath + " is mandatory");
+    }
+    return child.Value;
+  }
+
+  private string ReplaceTokens(string source, Dictionary<string,string> tokens)
+  {
+    foreach (string token in tokens.Keys)
+    {
+      source = source.Replace("$(" + token + ")", tokens[token]);
+    }
+
+    return source;
+  }
+
+  private string GetProcessOutput(string localPath, string path, string command)
+  {
+    var psi = new ProcessStartInfo(path, command)
+    {
+      WindowStyle = ProcessWindowStyle.Hidden,
+      UseShellExecute = false,
+      ErrorDialog = false,
+      CreateNoWindow = false,
+      WorkingDirectory = localPath,
+      RedirectStandardOutput = true,
+      RedirectStandardError = true
+    };
+
+    using (var p = Process.Start(psi))
+    {
+      p.WaitForExit();
+      if (p.ExitCode != 0)
+      {
+        using (var standardError = p.StandardError)
+        {
+          //TODO: just write to stdout?
+          //Host.Error(standardError.ReadToEnd());
+        }
+        return null;
+      }
+
+      using (var standardOutput = p.StandardOutput)
+      {
+        return standardOutput.ReadToEnd();
+      }
+    }
+  }
+
+  public string HgVersion(string path)
+  {
+    path = path ?? ".";
+
+    //Log.LogMessage(MessageImportance.Low, "path is {0}", path);
+    var hgPath = File.Exists(@"c:\program files (x86)\TortoiseHg\hg.exe") ?
+      @"c:\program files (x86)\TortoiseHg\hg.exe" :
+      @"c:\program files\TortoiseHg\hg.exe";
+
+    return GetProcessOutput(path, hgPath, "log -l 1 --template \"{node|short}\"");
+  }
+
+  //borrowed / modified from from https://gist.github.com/966148
+  public string GitVersion(string path)
+  {
+    path = path ?? ".";
+
+    //Log.LogMessage(MessageImportance.Low, "path is {0}", path);
+    var gitPath = File.Exists(@"c:\program files (x86)\git\bin\git.exe") ?
+      @"c:\program files (x86)\git\bin\git.exe" :
+      @"c:\program files\git\bin\git.exe";
+
+    return GetProcessOutput(path, gitPath, "log -1 --pretty=format:%h");
+  }
+#>
