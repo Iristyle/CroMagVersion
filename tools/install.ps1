@@ -20,7 +20,69 @@ function Get-RelativeFilePath
     }
 }
 
-$targetsFileName = 'CroMagVersion.targets'
+function AddOrGetItem($xml, $type, $path)
+{
+  $include = $xml.Items |
+      ? { $_.Include -ieq $path } |
+      Select-Object -First 1
+
+  if ($include -ne $null) { return $include }
+
+  Write-Host "Adding item of type $type to $path."
+  return $xml.AddItem($type, $path)
+}
+
+function AddOrGetTask($target, $name)
+{
+  $task = $target.Tasks |
+    ? { $_.Name -ieq $name } |
+    Select-Object -First 1
+
+  if ($task -ne $null) { return $task }
+
+  Write-Host "Adding task $name."
+  return $target.AddTask($name)
+}
+
+function AddOrGetTarget($xml, $name)
+{
+  $target = $xml.Targets |
+    ? { $_.Name -ieq $name } |
+      Select-Object -First 1
+
+  if ($target -ne $null) { return $target }
+
+  Write-Host "Adding inline $name target."
+  return $xml.AddTarget($name)
+}
+
+function SetItemMetadata($item, $name, $value)
+{
+  $match = $item.Metadata |
+    ? { $_.Name -ieq $name } |
+    Select-Object -First 1
+
+  if ($match -eq $null)
+  {
+    [Void]$item.AddMetadata($name, $value)
+    Write-Host "Added metadata $name"
+  }
+  else { $match.Value = $value }
+}
+
+function SetProperty($xml, $name, $value)
+{
+  $property = $xml.Properties |
+    ? { $_.Name -ieq $name } |
+    Select-Object -First 1
+
+  if ($property -eq $null)
+  {
+    [Void]$xml.AddProperty($name, $value)
+    Write-Host "Added property $name"
+  }
+  else { $property.Value = $value }
+}
 
 #copy version.props to same directory as solution
 $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
@@ -50,7 +112,8 @@ if (! ($versionPropsExists))
 }
 
 #comment stuff we'll share out of existing AssemblyInfo.cs
-$existingAssemblyInfoPath = Join-Path ([IO.Path]::GetDirectoryName($project.FullName)) (Get-RelativeFilePath $project.ProjectItems 'AssemblyInfo.cs')
+$projectPath = ([IO.Path]::GetDirectoryName($project.FullName))
+$existingAssemblyInfoPath = Join-Path $projectPath (Get-RelativeFilePath $project.ProjectItems 'AssemblyInfo.cs')
 if (($existingAssemblyInfoPath -imatch 'AssemblyInfo.cs') -and (Test-Path $existingAssemblyInfoPath))
 {
     $attribRegex = '^([^//].*(AssemblyCompany|AssemblyCopyright|AssemblyConfiguration|AssemblyVersion|AssemblyFileVersion|AssemblyInformationalVersion).*)$'
@@ -61,9 +124,25 @@ if (($existingAssemblyInfoPath -imatch 'AssemblyInfo.cs') -and (Test-Path $exist
 
 Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
+#http://msdn.microsoft.com/en-us/library/microsoft.build.evaluation.project
+#http://msdn.microsoft.com/en-us/library/microsoft.build.construction.projectrootelement
+#http://msdn.microsoft.com/en-us/library/microsoft.build.construction.projectitemelement
 $msbuild = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.GetLoadedProjects($project.FullName) | Select-Object -First 1
 
-$targetsFile = Join-Path $toolsPath $targetsFileName
+#Add the CROMAG property to any constants that aren't defined DEBUG
+$msbuild.Xml.Properties |
+  ? { ($_.Name -ieq 'DefineConstants') -and ($_.Value -inotmatch 'DEBUG') `
+    -and ($_.Value -inotmatch 'CROMAG') } |
+  % { $_.Value += ';CROMAG' }
+
+# trash old import target if it exists
+$targetsPath = "`$($($package.Id))\$($package.Id).targets"
+$msbuild.Xml.Imports |
+    ? { $_.Project -ieq $targetsPath } |
+    % {
+        $_.Parent.RemoveChild($_)
+        Write-Host "Removed import of $targetsPath."
+    }
 
 # Make the path to the targets file relative.
 $projectUri = New-Object Uri("file://$($project.FullName)")
@@ -71,40 +150,39 @@ $targetUri = New-Object Uri("file://$($toolsPath)")
 $relativePath = $projectUri.MakeRelativeUri($targetUri).ToString() `
   -replace [IO.Path]::AltDirectorySeparatorChar, [IO.Path]::DirectorySeparatorChar
 
-#update targets path
-$msbuild.Xml.Properties | ? { $_.Name -ieq $package.Id } |
-    % { $_.Parent.RemoveChild($_) }
-$msbuild.Xml.AddProperty($package.Id, $relativePath ) | Out-Null
-Write-Host "Added property $($package.Id)"
+#update CroMagVersion path based on version
+SetProperty $msbuild.Xml $package.Id $relativePath
 
-# add the target if necessary
-$targetsPath = "`$($($package.Id))\$($package.Id).targets"
+# add the inline target if necessary
+#TODO: must occur after import of Microsoft.CSharp.targets
+$target = AddOrGetTarget $msbuild.Xml 'CroMagVersion'
+$target.Condition = '$(DefineConstants.Contains(''CROMAG''))'
+$target.BeforeTargets = 'CoreCompile'
 
-$importExists = ($msbuild.Xml.Imports |
-    ? { $_.Project -ieq $targetsPath } |
-    Measure-Object | Select -ExpandProperty Count) -gt 0
-
-if (! ($importExists))
-{
-    $import = $msbuild.Xml.AddImport($targetsPath)
-    $import.Condition = "Exists('$targetsPath')"
-    Write-Host "Added import of '$targetsPath'."
-}
+$exec = AddOrGetTask $target 'Exec'
+#TODO: how do we pass spaces in paths ???
+#this will break since we don't have a way to pass anything with -a
+#Setparameter is add or update
+$exec.SetParameter('Command',
+  '$(CroMagVersion)\TextTransform.exe -o="$(CroMagVersion)\SharedAssemblyInfo.cs" -a=Configuration!$(Configuration) -a=SolutionDir!$(SolutionDir) "$(CroMagVersion)\CroMagVersion.tt"')
+$exec.SetParameter('WorkingDirectory', '$(MSBuildThisFileDirectory)')
+$exec.SetParameter('CustomErrorRegularExpression', '.*: ERROR .*')
 
 #link in sharedAssemblyInfo to the project
 $sharedAssemblyInfo = Join-Path $toolsPath 'SharedAssemblyInfo.cs'
 '' | Out-File $sharedAssemblyInfo
 
 $sharedAssemblyInfoPath = "`$($($package.Id))\SharedAssemblyInfo.cs"
-$sharedExists = ($msbuild.Xml.Items |
-    ? { $_.Include -ieq $sharedAssemblyInfoPath } |
-    Measure-Object | Select -ExpandProperty Count) -gt 0
+$item = AddOrGetItem $msbuild.Xml 'Compile' $sharedAssemblyInfoPath
+SetItemMetadata $item 'Link' 'Properties\SharedAssemblyInfo.cs'
+SetItemMetadata $item 'AutoGen' 'True'
+SetItemMetadata $item 'DesignTime' 'True'
+SetItemMetadata $item 'DependentUpon' 'CroMagVersion.tt'
 
-if (! ($sharedExists))
-{
-    $include = $msbuild.Xml.AddItem("Compile", $sharedAssemblyInfoPath)
-    $include.AddMetadata('Link','Properties\SharedAssemblyInfo.cs')
-    Write-Host "Added link to SharedAssemblyInfo.cs."
-}
+$templatePath = "`$($($package.Id))\CroMagVersion.tt"
+$item = AddOrGetItem $msbuild.Xml 'None' $templatePath
+SetItemMetadata $item 'Link' 'Properties\CroMagVersion.tt'
+SetItemMetadata $item 'Generator' 'TextTemplatingFileGenerator'
+SetItemMetadata $item 'LastGenOutput' 'SharedAssemblyInfo.cs'
 
 $project.Save($project.FullName)

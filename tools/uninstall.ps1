@@ -44,6 +44,11 @@ $existingAssemblyInfoPath = Join-Path ([IO.Path]::GetDirectoryName($project.Full
 $dte.ItemOperations.OpenFile($existingAssemblyInfoPath)
 Write-Host "Opened $existingAssemblyInfoPath for user to undo changes."
 
+#Remove CROMAG property from build constants
+$msbuild.Xml.Properties |
+  ? { ($_.Name -ieq 'DefineConstants') -and ($_.Value -imatch '\bCROMAG\b') } |
+  % { $_.Value = $_.Value -ireplace '\bCROMAG\b', '' }
+
 #remove targets path property
 $msbuild.Xml.Properties | ? { $_.Name -ieq $package.Id } | 
     % { 
@@ -60,12 +65,21 @@ $msbuild.Xml.Imports |
         Write-Host "Removed import of $targetsPath."
     }
 
-$sharedAssemblyInfoPath = "`$($($package.Id))\SharedAssemblyInfo.cs"
-$msbuild.Xml.Items | 
-    ? { $_.Include -ieq $sharedAssemblyInfoPath } |
+$msbuild.Xml.Targets | 
+    ? { $_.Name -ieq $package.Id } |
     % {
         $_.Parent.RemoveChild($_)
-        Write-Host "Removed link to SharedAssemblyInfo.cs."
+        Write-Host "Removed $($package.Id) Target."
+    }
+
+$paths = @("`$($($package.Id))\SharedAssemblyInfo.cs",
+    "`$($($package.Id))\CroMagVersion.tt")
+$sharedAssemblyInfoPath = 
+$msbuild.Xml.Items | 
+    ? { $paths -icontains $_.Include } |
+    % {
+        $_.Parent.RemoveChild($_)
+        Write-Host "Removed link to $($_.Include)"
     }
 
 $project.Save($project.FullName)
