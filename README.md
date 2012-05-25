@@ -135,9 +135,14 @@ The names for the slots aren't important so much as the semantics.
 
 * [SemVerHarvester](https://github.com/jennings/SemVerHarvester) - MSBuild task library that harvests version numbers from tags in source control versions.  It appears to work with both Git and Mercurial.
 
-## Future Improvements
+## Future Improvements / Known Issues
 
 * Ensure Mono works properly
+* There *might* be a race condition with how SharedAssemblyInfo.cs is generated.
+The new T4 based system is an attempt to correct this (at the very least it will
+provide a better system for dealing with this since MSBuild is difficult)
+* In Visual Studio, CroMagVersion.tt doesn't initially show under Properties,
+even though it exists in the csproj on disk. This appears to be a VS bug.
 
 ## Release Notes
 
