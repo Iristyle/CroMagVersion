@@ -2,23 +2,26 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>CroMagVersion</id>
-    <version>0.2.5.0</version>
+    <version>0.3.0.0</version>
     <title>Cro-Magnon - Simple Automatic Versioning</title>
     <authors>Ethan Brown</authors>
-    <owners>Ethan Brown</owners>    
+    <owners>Ethan Brown</owners>
     <summary>An MSBuild project integration that makes it easy to keep version numbers synced across all projects in a solution based on a simple date scheme and user provided major / minor version numbers.</summary>
     <description>An MSBuild project integration that makes it easy to keep version numbers synced across all projects in a solution based on a simple date scheme and user provided major / minor version numbers.  Provides a single source of truth for versioning, and modifies it at build time as necessary to keep assembly metadata fresh.</description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
-        * Removed MSBuild-y ness from version.props since its extraneous and confuses things (breaking change)
-        * Added ability to override FileVersion and AssemblyInformationalVersion versions with a custom layout given a few well known variables
-        * Able to find AssemblyInfo.cs in locations other than Properties folder
-        * Using BeforeTargets="CoreCompile" instead of BeforeTargets="Build"
-        * Renamed Lines ItemGroup internally to AssemblyInfoLines to prevent possible collisions with other global MSBuild variables
-        * Renamed Version target to CroMagVersion target to prevent possible MSBuild collisions
-        * CroMagVersion now registered as a dependency via BuildDependsOn and RebuildDependsOn
+        * File generation is now provided through a T4 template instead of via
+        an imported MSBuild target.  This was necessary to better support
+        package restore, and should be a transparent under-the-hood change.
+        * Includes MonoDevelops TextTransform.exe to codegen instead of relying
+        on anything that ships with Visual Studio
+        * Adds a new CROMAG variable that must be defined to generate versioning
+        code - by default this is enabled for any non-DEBUG builds
+        * Removed the dependency on an msbuild mercurial task
+        * Breaking change - no longer emits MSBuild variables $(VersionNumber)
+        $(Changeset) $(BuildVersion) or $(RevisionVersion)
         </releaseNotes>
-    <projectUrl>https://github.com/EastPoint/CroMagVersion</projectUrl>    
+    <projectUrl>https://github.com/EastPoint/CroMagVersion</projectUrl>
     <licenseUrl>https://github.com/EastPoint/CroMagVersion/blob/master/LICENSE.md</licenseUrl>
     <iconUrl>https://github.com/EastPoint/CroMagVersion/raw/master/logo-128.png</iconUrl>
     <tags>msbuild version ci continuous integration dvcs mercurial hg git</tags>
@@ -26,8 +29,8 @@
     <copyright>East Point Systems 2012 and contributors</copyright>
   </metadata>
   <files>
-    <file src="tools\*" target="tools" /> 
-    <!-- nuget package needs something in content, otherwise it won't run install.ps1 --> 
+    <file src="tools\*" target="tools" />
+    <!-- nuget package needs something in content, otherwise it won't run install.ps1 -->
     <file src="content\README.txt" target="content\Properties\README-CroMagVersion.txt" />
   </files>
 </package>
