@@ -2,7 +2,13 @@ param(
   [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
   [string]
   $apiKey,
-  [Parameter(Mandatory = $false)]
+
+  [Parameter(Mandatory = $false, Position=0)]
+  [string]
+  [ValidateSet('Push','Pack')]
+  $operation = 'Push',
+
+  [Parameter(Mandatory = $false, Position=1)]
   [string]
   $source = ''
 )
@@ -33,15 +39,13 @@ function Restore-Nuget
   #$msbuild = "c:\windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
   Start-Process 'msbuild' -ArgumentList "NugetRestore.proj" `
     -WorkingDirectory (Join-Path (Get-CurrentDirectory) '.nuget') -NoNewWindow -Wait
-  Get-NugetPath
+  return Get-NugetPath
 }
 
-function Pack-And-Push
+function Invoke-Pack
 {
   $currentDirectory = Get-CurrentDirectory
   Write-Host "Running against $currentDirectory"
-
-  $nuget = Restore-Nuget
 
   Get-ChildItem -Path $currentDirectory -Filter *.nuspec -Recurse |
     ? { $_.FullName -inotmatch 'packages' } |
@@ -53,17 +57,22 @@ function Pack-And-Push
       }
       else { "pack $_"}
 
-      Start-Process $nuget -ArgumentList $cmdLine -NoNewWindow -Wait
-    }
-
-  Get-ChildItem *.nupkg |
-    % {
-      Write-Host "Value of source -> $source"
-      if ($source -eq '') { &$nuget push $_ $apiKey }
-      else { &$nuget push $_ $apiKey -s $source }
+      Start-Process $script:nuget -ArgumentList $cmdLine -NoNewWindow -Wait
     }
 }
 
+function Invoke-Push
+{
+ Get-ChildItem *.nupkg |
+   % {
+     Write-Host "Value of source -> $source"
+     if ($source -eq '') { &$script:nuget push $_ $apiKey }
+     else { &$script:nuget push $_ $apiKey -s $source }
+   }
+}
+
+$script:nuget = Restore-Nuget
 del *.nupkg
-Pack-And-Push
+Invoke-Pack
+if ($operation -eq 'Push') { Invoke-Push }
 del *.nupkg
