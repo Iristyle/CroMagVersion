@@ -146,6 +146,19 @@ even though it exists in the csproj on disk. This appears to be a VS bug.
 
 ## Release Notes
 
+* 0.3.1.0 - minor bugfixes
+
+		* If a project path contained spaces, TextTransform.exe would fail to handle
+		the SolutionDir properly.  There was an interesting issue with Mono.Options
+		that made it more difficult than it should have been to quote variables at
+		the command line.
+		* Non-standard Git and Mercurial locations are OK, as long as git.exe or
+		hg.exe is in the PATH.
+		* Uninstall no longer opens the AssemblyInfo.cs files modified during
+		installation.  This is because there is no way to differentiate a package
+		update from a full on removal.
+
+
 * 0.3.0.0 - major rewrite of codegen procedure
 
 		* File generation is now provided through a T4 template instead of via an
