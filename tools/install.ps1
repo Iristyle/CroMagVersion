@@ -160,11 +160,10 @@ $target.Condition = '$(DefineConstants.Contains(''CROMAG''))'
 $target.BeforeTargets = 'CoreCompile'
 
 $exec = AddOrGetTask $target 'Exec'
-#TODO: how do we pass spaces in paths ???
-#this will break since we don't have a way to pass anything with -a
-#Setparameter is add or update
+#HACK: trailing space from quoted -a params is critically necessary
+#Mono.Options will treat a \" as a C# escaped string, so eats the \
 $exec.SetParameter('Command',
-  '$(CroMagVersion)\TextTransform.exe -o="$(CroMagVersion)\SharedAssemblyInfo.cs" -a=Configuration!$(Configuration) -a=SolutionDir!$(SolutionDir) "$(CroMagVersion)\CroMagVersion.tt"')
+  '$(CroMagVersion)\TextTransform.exe -o="$(CroMagVersion)\SharedAssemblyInfo.cs" -a="Configuration!$(Configuration) " -a="SolutionDir!$(SolutionDir) " "$(CroMagVersion)\CroMagVersion.tt"')
 $exec.SetParameter('WorkingDirectory', '$(MSBuildThisFileDirectory)')
 $exec.SetParameter('CustomErrorRegularExpression', '.*: ERROR .*')
 
