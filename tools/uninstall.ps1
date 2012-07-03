@@ -38,12 +38,6 @@ $sharedAssemblyInfo = Join-Path $toolsPath 'SharedAssemblyInfo.cs'
 del $sharedAssemblyInfo -ErrorAction SilentlyContinue
 Write-Host "Deleted $sharedAssemblyInfo"
 
-#launch an editor for a user to undo changes to AssemblyInfo.cs
-$existingAssemblyInfo = $project.ProjectItems.Item('Properties').ProjectItems.Item('AssemblyInfo.cs')
-$existingAssemblyInfoPath = Join-Path ([IO.Path]::GetDirectoryName($project.FullName)) 'Properties\AssemblyInfo.cs'
-$dte.ItemOperations.OpenFile($existingAssemblyInfoPath)
-Write-Host "Opened $existingAssemblyInfoPath for user to undo changes."
-
 #Remove CROMAG property from build constants
 $msbuild.Xml.Properties |
   ? { ($_.Name -ieq 'DefineConstants') -and ($_.Value -imatch '\bCROMAG\b') } |
