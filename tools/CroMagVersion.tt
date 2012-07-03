@@ -17,8 +17,6 @@ using System.Resources;
 <#+
 
 private string drive = Environment.GetEnvironmentVariable("SystemDrive");
-private string programFiles = string.Format(@"{0}\Program Files", drive);
-private string programFilesx86 = string.Format(@"{0}\Program Files (x86)", drive);
 
 private void WriteAttributes()
 {
@@ -188,6 +186,8 @@ private void WriteAttributes()
     path = path ?? ".";
 
     //Log.LogMessage(MessageImportance.Low, "path is {0}", path);
+    var programFiles = string.Format(@"{0}\Program Files", drive);
+    var programFilesx86 = string.Format(@"{0}\Program Files (x86)", drive);
     var hg = string.Format(@"{0}\TortoiseHg\hg.exe", programFiles);
     var hgx86 = string.Format(@"{0}\TortoiseHg\hg.exe", programFilesx86);
     var merc = string.Format(@"{0}\Mercurial\hg.exe", programFiles);
@@ -207,6 +207,8 @@ private void WriteAttributes()
     path = path ?? ".";
 
     //Log.LogMessage(MessageImportance.Low, "path is {0}", path);
+    var programFiles = string.Format(@"{0}\Program Files", drive);
+    var programFilesx86 = string.Format(@"{0}\Program Files (x86)", drive);
     var git = string.Format(@"{0}\git\bin\git.exe", programFiles);
     var gitx86 = string.Format(@"{0}\git\bin\git.exe", programFilesx86);
 
