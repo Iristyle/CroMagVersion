@@ -15,6 +15,11 @@ using System.Reflection;
 using System.Resources;
 <# WriteAttributes(); #>
 <#+
+
+private string drive = Environment.GetEnvironmentVariable("SystemDrive");
+private string programFiles = string.Format(@"{0}\Program Files", drive);
+private string programFilesx86 = string.Format(@"{0}\Program Files (x86)", drive);
+
 private void WriteAttributes()
 {
   var localPath = Path.GetDirectoryName(Host.TemplateFile);
@@ -183,9 +188,15 @@ private void WriteAttributes()
     path = path ?? ".";
 
     //Log.LogMessage(MessageImportance.Low, "path is {0}", path);
-    var hgPath = File.Exists(@"c:\program files (x86)\TortoiseHg\hg.exe") ?
-      @"c:\program files (x86)\TortoiseHg\hg.exe" :
-      @"c:\program files\TortoiseHg\hg.exe";
+    var hg = string.Format(@"{0}\TortoiseHg\hg.exe", programFiles);
+    var hgx86 = string.Format(@"{0}\TortoiseHg\hg.exe", programFilesx86);
+    var merc = string.Format(@"{0}\Mercurial\hg.exe", programFiles);
+    var mercx86 = string.Format(@"{0}\Mercurial\hg.exe", programFilesx86);
+
+    //try standard locations and fall back to assumption of it being in path
+    var hgPath = File.Exists(hgx86) ? hgx86 : File.Exists(hg) ? hg :
+      File.Exists(mercx86) ? mercx86 : File.Exists(merc)? merc :
+      "hg.exe";
 
     return GetProcessOutput(path, hgPath, "log -l 1 --template \"{node|short}\"");
   }
@@ -196,9 +207,12 @@ private void WriteAttributes()
     path = path ?? ".";
 
     //Log.LogMessage(MessageImportance.Low, "path is {0}", path);
-    var gitPath = File.Exists(@"c:\program files (x86)\git\bin\git.exe") ?
-      @"c:\program files (x86)\git\bin\git.exe" :
-      @"c:\program files\git\bin\git.exe";
+    var git = string.Format(@"{0}\git\bin\git.exe", programFiles);
+    var gitx86 = string.Format(@"{0}\git\bin\git.exe", programFilesx86);
+
+    //try standard locations and fall back to assumption of it being in path
+    var gitPath = File.Exists(gitx86) ? gitx86 : File.Exists(git) ? git :
+      "git.exe";
 
     return GetProcessOutput(path, gitPath, "log -1 --pretty=format:%h");
   }
