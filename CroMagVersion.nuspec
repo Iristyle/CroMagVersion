@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>CroMagVersion</id>
-    <version>0.3.1.0</version>
+    <version>0.3.2.0</version>
     <title>Cro-Magnon - Simple Automatic Versioning</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -22,6 +22,7 @@
         $(Changeset) $(BuildVersion) or $(RevisionVersion)
         * Minor bugfixes to handle project paths with spaces, and non-standard
         Git and Mercurial locations on disk.
+        * Initial DEBUG builds would fail until a RELEASE build generated info
         </releaseNotes>
     <projectUrl>https://github.com/EastPoint/CroMagVersion</projectUrl>
     <licenseUrl>https://github.com/EastPoint/CroMagVersion/blob/master/LICENSE.md</licenseUrl>

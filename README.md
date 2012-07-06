@@ -137,14 +137,19 @@ The names for the slots aren't important so much as the semantics.
 
 ## Future Improvements / Known Issues
 
+* Until proper MSBuild inputs / outputs are figured out, there might be issues
+in VS 2012 with parallel builds enabled.  File locking may occur, due to a race
+condition with generation of SharedAssemblyInfo.cs.
 * Ensure Mono works properly
-* There *might* be a race condition with how SharedAssemblyInfo.cs is generated.
-The new T4 based system is an attempt to correct this (at the very least it will
-provide a better system for dealing with this since MSBuild is difficult)
 * In Visual Studio, CroMagVersion.tt doesn't initially show under Properties,
 even though it exists in the csproj on disk. This appears to be a VS bug.
 
 ## Release Notes
+
+* 0.3.2.0 - minor bugfix
+		* An initial DEBUG build would fail after the first package restore, until
+		a RELEASE build was executed first.  Now shipping an empty version file to
+		work around this issue.
 
 * 0.3.1.0 - minor bugfixes
 
