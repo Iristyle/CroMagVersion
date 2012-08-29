@@ -146,7 +146,7 @@ even though it exists in the csproj on disk. This appears to be a VS bug.
 
 ## Release Notes
 
-* 0.3.3.0 - deleting README-CroMagVersion.txt during install
+* 0.3.4.0 - deleting README-CroMagVersion.txt during install
 		* This file is used to ensure install.ps1 is kicked off, but thats it!
 
 * 0.3.2.0 - minor bugfix
