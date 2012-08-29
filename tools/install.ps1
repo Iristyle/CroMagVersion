@@ -32,6 +32,16 @@ function AddOrGetItem($xml, $type, $path)
   return $xml.AddItem($type, $path)
 }
 
+function RemoveItem($xml, $paths)
+{
+  $msbuild.Xml.Items |
+    ? { $paths -icontains $_.Include } |
+    % {
+      $_.Parent.RemoveChild($_)
+      Write-Host "Removed $($_.Include)"
+    }
+}
+
 function AddOrGetTask($target, $name)
 {
   $task = $target.Tasks |
@@ -183,5 +193,8 @@ $item = AddOrGetItem $msbuild.Xml 'None' $templatePath
 SetItemMetadata $item 'Link' 'Properties\CroMagVersion.tt'
 SetItemMetadata $item 'Generator' 'TextTemplatingFileGenerator'
 SetItemMetadata $item 'LastGenOutput' 'SharedAssemblyInfo.cs'
+
+#remove our garbage file that we used to kick off install.ps1
+RemoveItem $msbuild.Xml 'Properties\README-CroMagVersion.txt'
 
 $project.Save($project.FullName)

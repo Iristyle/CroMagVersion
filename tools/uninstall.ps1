@@ -68,7 +68,7 @@ $msbuild.Xml.Targets |
 
 $paths = @("`$($($package.Id))\SharedAssemblyInfo.cs",
     "`$($($package.Id))\CroMagVersion.tt")
-$sharedAssemblyInfoPath =
+
 $msbuild.Xml.Items |
   ? { $paths -icontains $_.Include } |
   % {
