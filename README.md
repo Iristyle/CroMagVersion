@@ -146,45 +146,41 @@ even though it exists in the csproj on disk. This appears to be a VS bug.
 
 ## Release Notes
 
-* 0.3.2.0 - minor bugfix
-		* An initial DEBUG build would fail after the first package restore, until
-		a RELEASE build was executed first.  Now shipping an empty version file to
-		work around this issue.
+#### 0.3.2.0 - minor bugfix
 
-* 0.3.1.0 - minor bugfixes
+* An initial DEBUG build would fail after the first package restore, until a RELEASE build
+was executed first.  Now shipping an empty version file to work around this issue.
 
-		* If a project path contained spaces, TextTransform.exe would fail to handle
-		the SolutionDir properly.  There was an interesting issue with Mono.Options
-		that made it more difficult than it should have been to quote variables at
-		the command line.
-		* Non-standard Git and Mercurial locations are OK, as long as git.exe or
-		hg.exe is in the PATH.
-		* Uninstall no longer opens the AssemblyInfo.cs files modified during
-		installation.  This is because there is no way to differentiate a package
-		update from a full on removal.
+#### 0.3.1.0 - minor bugfixes
+
+* If a project path contained spaces, TextTransform.exe would fail to handle the SolutionDir 
+properly.  There was an interesting issue with Mono.Options that made it more difficult than 
+it should have been to quote variables at the command line.
+* Non-standard Git and Mercurial locations are OK, as long as git.exe or hg.exe is in the PATH.
+* Uninstall no longer opens the AssemblyInfo.cs files modified during installation.  This is
+because there is no way to differentiate a package update from a full on removal.
 
 
-* 0.3.0.0 - major rewrite of codegen procedure
+#### 0.3.0.0 - major rewrite of codegen procedure
 
-		* File generation is now provided through a T4 template instead of via an
-		imported MSBuild target.  This was necessary to better support package
-		restore, and should be a transparent under-the-hood change.
-		* Includes MonoDevelops TextTransform.exe to codegen instead of relying	on
-		anything that ships with Visual Studio
-		* Adds a new CROMAG variable that must be defined to generate versioning
-		code - by default this is enabled for any non-DEBUG builds
-		* Breaking change - no longer emits MSBuild variables $(VersionNumber)
-		$(Changeset) $(BuildVersion) or $(RevisionVersion)
+* File generation is now provided through a T4 template instead of via an imported MSBuild target.
+This was necessary to better support package restore, and should be a transparent under-the-hood change.
+* Includes MonoDevelops TextTransform.exe to codegen instead of relying	on anything that ships
+with Visual Studio
+* Adds a new CROMAG variable that must be defined to generate versioning code - by default this
+is enabled for any non-DEBUG builds
+* Breaking change - no longer emits MSBuild variables $(VersionNumber) $(Changeset) $(BuildVersion)
+or $(RevisionVersion)
 
-* 0.2.5.0
+#### 0.2.5.0
 
-		* Removed MSBuild-y ness from version.props since its extraneous and confuses things (breaking change)
-		* Added ability to override FileVersion and AssemblyInformationalVersion versions with a custom layout given a few well known variables
-		* Able to find AssemblyInfo.cs in locations other than Properties folder
-		* Using BeforeTargets="CoreCompile" instead of BeforeTargets="Build"
-		* Renamed Lines ItemGroup internally to AssemblyInfoLines to prevent possible collisions with other global MSBuild variables
-		* Renamed Version target to CroMagVersion target to prevent possible MSBuild collisions
-		* CroMagVersion now registered as a dependency via BuildDependsOn and RebuildDependsOn
+* Removed MSBuild-y ness from version.props since its extraneous and confuses things (breaking change)
+* Added ability to override FileVersion and AssemblyInformationalVersion versions with a custom layout given a few well known variables
+* Able to find AssemblyInfo.cs in locations other than Properties folder
+* Using BeforeTargets="CoreCompile" instead of BeforeTargets="Build"
+* Renamed Lines ItemGroup internally to AssemblyInfoLines to prevent possible collisions with other global MSBuild variables
+* Renamed Version target to CroMagVersion target to prevent possible MSBuild collisions
+* CroMagVersion now registered as a dependency via BuildDependsOn and RebuildDependsOn
 
 ## Contributing
 
