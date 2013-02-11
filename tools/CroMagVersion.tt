@@ -61,7 +61,7 @@ private void WriteAttributes()
       ?? Environment.GetEnvironmentVariable("BUILD_NUMBER") ?? "0", 3) },
     { "Revision", "0" },
     { "Configuration", Configuration },
-    { "Changeset", HgVersion(localPath) ?? GitVersion(localPath) ?? string.Empty },
+    { "Changeset", GitVersion(localPath) ?? HgVersion(localPath) ?? string.Empty },
     { "YearMonth", DateTime.UtcNow.ToString("yyMM") },
     { "DayNumber", DateTime.UtcNow.ToString("dd") },
     { "Year", DateTime.UtcNow.ToString("yyyy") },
