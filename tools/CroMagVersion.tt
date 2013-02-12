@@ -150,6 +150,8 @@ private void WriteAttributes()
 
   private string GetProcessOutput(string localPath, string path, string command)
   {
+    if (!File.Exists(path)) { return null; }
+
     var psi = new ProcessStartInfo(path, command)
     {
       WindowStyle = ProcessWindowStyle.Hidden,
@@ -195,8 +197,20 @@ private void WriteAttributes()
 
     //try standard locations and fall back to assumption of it being in path
     var hgPath = File.Exists(hgx86) ? hgx86 : File.Exists(hg) ? hg :
-      File.Exists(mercx86) ? mercx86 : File.Exists(merc)? merc :
-      "hg.exe";
+      File.Exists(mercx86) ? mercx86 : File.Exists(merc)? merc : null;
+
+    if (null == hgPath)
+    {
+      foreach (string p in Environment.GetEnvironmentVariable("PATH").Split(';'))
+      {
+        var test = Path.Combine(p, "hg.exe");
+        if (File.Exists(test))
+        {
+          hgPath = test;
+          break;
+        }
+      }
+    }
 
     return GetProcessOutput(path, hgPath, "log -l 1 --template \"{node|short}\"");
   }
@@ -213,8 +227,20 @@ private void WriteAttributes()
     var gitx86 = string.Format(@"{0}\git\bin\git.exe", programFilesx86);
 
     //try standard locations and fall back to assumption of it being in path
-    var gitPath = File.Exists(gitx86) ? gitx86 : File.Exists(git) ? git :
-      "git.exe";
+    var gitPath = File.Exists(gitx86) ? gitx86 : File.Exists(git) ? git : null;
+
+    if (null == gitPath)
+    {
+      foreach (string p in Environment.GetEnvironmentVariable("PATH").Split(';'))
+      {
+        var test = Path.Combine(p, "git.exe");
+        if (File.Exists(test))
+        {
+          gitPath = test;
+          break;
+        }
+      }
+    }
 
     return GetProcessOutput(path, gitPath, "log -1 --pretty=format:%h");
   }
