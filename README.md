@@ -146,9 +146,15 @@ even though it exists in the csproj on disk. This appears to be a VS bug.
 
 ## Release Notes
 
+#### 0.3.5.0 - minor bugfix
+
+* When hg or git was not in PATH, builds could generate spurious exceptions like
+`System.ComponentModel.Win32Exception (0x80004005): The system cannot find the file specified`
+
 #### 0.3.4.0 - minor bugfix
-    * Deleting README-CroMagVersion.txt during install
-    * This file is used to ensure install.ps1 is kicked off, but thats it!
+
+* Deleting README-CroMagVersion.txt during install
+* This file is used to ensure install.ps1 is kicked off, but thats it!
 
 #### 0.3.2.0 - minor bugfix
 
