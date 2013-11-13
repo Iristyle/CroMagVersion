@@ -81,27 +81,42 @@ private void WriteAttributes()
     validTokens["MajorVersion"], validTokens["MinorVersion"],
     validTokens["BuildVersion"], validTokens["RevisionVersion"]));
 
+  var assemblyCompanyLayout = GetNode(root, "AssemblyCompanyLayout/text()", false) ?? string.Empty;
+  var assemblyCopyrightLayout = GetNode(root, "AssemblyCopyrightLayout/text()", false) ?? string.Empty;
+  var assemblyConfigurationLayout = GetNode(root, "AssemblyConfigurationLayout/text()", false) ?? string.Empty;
   var assemblyVersionLayout = GetNode(root, "AssemblyVersionLayout/text()", false) ?? string.Empty;
   var assemblyFileVersionLayout = GetNode(root, "AssemblyFileVersionLayout/text()", false) ?? string.Empty;
   var assemblyInformationalVersionLayout = GetNode(root, "AssemblyInformationalVersionLayout/text()", false) ?? string.Empty;
 
   // search replace msbuild style tokens that a user might incorporate
+  if (!string.IsNullOrEmpty(assemblyCompanyLayout))
+  {
+    assemblyCompanyLayout = ReplaceTokens(assemblyCompanyLayout, validTokens).Trim();
+  }
+
+  if (!string.IsNullOrEmpty(assemblyCopyrightLayout))
+  {
+    assemblyCopyrightLayout = ReplaceTokens(assemblyCopyrightLayout, validTokens).Trim();
+  }
+
+  if (!string.IsNullOrEmpty(assemblyConfigurationLayout))
+  {
+    assemblyConfigurationLayout = ReplaceTokens(assemblyConfigurationLayout, validTokens).Trim();
+  }
+
   if (!string.IsNullOrEmpty(assemblyVersionLayout) && assemblyVersionLayout != validTokens["VersionNumber"])
   {
-    assemblyVersionLayout = ReplaceTokens(assemblyVersionLayout, validTokens)
-      .Trim();
+    assemblyVersionLayout = ReplaceTokens(assemblyVersionLayout, validTokens).Trim();
   }
 
   if (!string.IsNullOrEmpty(assemblyFileVersionLayout) && assemblyFileVersionLayout != validTokens["VersionNumber"])
   {
-    assemblyFileVersionLayout = ReplaceTokens(assemblyFileVersionLayout, validTokens)
-      .Trim();
+    assemblyFileVersionLayout = ReplaceTokens(assemblyFileVersionLayout, validTokens).Trim();
   }
 
   if (!string.IsNullOrEmpty(assemblyInformationalVersionLayout) && assemblyInformationalVersionLayout != validTokens["VersionNumber"])
   {
-    assemblyInformationalVersionLayout =
-      ReplaceTokens(assemblyInformationalVersionLayout, validTokens).Trim();
+    assemblyInformationalVersionLayout = ReplaceTokens(assemblyInformationalVersionLayout, validTokens).Trim();
   }
 #>
 
@@ -109,9 +124,15 @@ private void WriteAttributes()
 
 <#+ } #>
 
-[assembly: AssemblyCompany("<#= validTokens["VersionCompany"] #> <#= validTokens["VersionCompanyUrl"] #>")]
-[assembly: AssemblyCopyright("Copyright © <#= validTokens["Year"] #> <#= validTokens["VersionCompany"] #>")]
-[assembly: AssemblyConfiguration("<#= validTokens["Configuration"] #> - <#= validTokens["Changeset"] #>")]
+<#+ if (!string.IsNullOrEmpty(assemblyCompanyLayout)) { #>
+[assembly: AssemblyCompany("<#= assemblyCompanyLayout #>")]
+<#+ } #>
+<#+ if (!string.IsNullOrEmpty(assemblyCopyrightLayout)) { #>
+[assembly: AssemblyCopyright("<#= assemblyCopyrightLayout #>")]
+<#+ } #>
+<#+ if (!string.IsNullOrEmpty(assemblyConfigurationLayout)) { #>
+[assembly: AssemblyConfiguration("<#= assemblyConfigurationLayout #>")]
+<#+ } #>
 <#+ if (!string.IsNullOrEmpty(assemblyVersionLayout)) { #>
 [assembly: AssemblyVersion("<#= assemblyVersionLayout #>")]
 <#+ } #>

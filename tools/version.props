@@ -4,6 +4,10 @@
 	<MinorVersion>0</MinorVersion>
 	<VersionCompany></VersionCompany>
 	<VersionCompanyUrl></VersionCompanyUrl>
+
+  	<AssemblyCompanyLayout>$(VersionCompany) $(VersionCompanyUrl)</AssemblyCompanyLayout>
+  	<AssemblyCopyrightLayout>Copyright © $(Year) $(VersionCompany)</AssemblyCopyrightLayout>
+  	<AssemblyConfigurationLayout>$(Configuration) - $(Changeset)</AssemblyConfigurationLayout>
 	<AssemblyVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
 	<AssemblyInformationalVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyInformationalVersionLayout>
 	<AssemblyFileVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
