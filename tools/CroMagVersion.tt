@@ -5,6 +5,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Reflection" #>
 <#@ import namespace="System.Xml" #>
 //~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
 //DANGER WILL ROBINSON - TOOL GENERATED FILE - DO NOT MODIFY THIS FILE BY HAND!
@@ -56,18 +57,17 @@ private void WriteAttributes()
     //  - Override BUILD_NUMBER specified in version.props if present
     //  - BUILD_NUMBER env variable as specified by a build server like Jenkins
     //  - 0 if not specified
-    { "Build", MaxLength(GetNode(root, "BUILD_NUMBER/text()", false)
-      //use only up to the last 3 characters so we don't overrun 65536
-      ?? Environment.GetEnvironmentVariable("BUILD_NUMBER") ?? "0", 3) },
-    { "Revision", "0" },
+  { "MajorVersion", GetDefaultVersion(root).Major.ToString() },
+    { "MinorVersion", GetDefaultVersion(root).Minor.ToString() },
+    { "Build", GetDefaultVersion(root).Build.ToString() },
+    { "Revision", GetDefaultVersion(root).Revision.ToString() },
     { "Configuration", Configuration },
     { "Changeset", GitVersion(localPath) ?? HgVersion(localPath) ?? string.Empty },
     { "YearMonth", DateTime.UtcNow.ToString("yyMM") },
     { "DayNumber", DateTime.UtcNow.ToString("dd") },
     { "Year", DateTime.UtcNow.ToString("yyyy") },
     //mandatory
-    { "MajorVersion", GetNode(root, "MajorVersion/text()", true) },
-    { "MinorVersion", GetNode(root, "MinorVersion/text()", true) },
+
     { "VersionCompany", GetNode(root, "VersionCompany/text()", true) },
     { "VersionCompanyUrl", GetNode(root, "VersionCompanyUrl/text()", true) },
   };
@@ -81,23 +81,27 @@ private void WriteAttributes()
     validTokens["MajorVersion"], validTokens["MinorVersion"],
     validTokens["BuildVersion"], validTokens["RevisionVersion"]));
 
-  string AssemblyFileVersionLayout =
-    GetNode(root, "AssemblyFileVersionLayout/text()", false)
-    ?? validTokens["VersionNumber"],
-  AssemblyInformationalVersionLayout =
-    GetNode(root, "AssemblyInformationalVersionLayout/text()", false)
-    ?? validTokens["VersionNumber"];
+  var assemblyVersionLayout = GetNode(root, "AssemblyVersionLayout/text()", false) ?? string.Empty;
+  var assemblyFileVersionLayout = GetNode(root, "AssemblyFileVersionLayout/text()", false) ?? string.Empty;
+  var assemblyInformationalVersionLayout = GetNode(root, "AssemblyInformationalVersionLayout/text()", false) ?? string.Empty;
 
   // search replace msbuild style tokens that a user might incorporate
-  if (AssemblyFileVersionLayout != validTokens["VersionNumber"])
+  if (!string.IsNullOrEmpty(assemblyVersionLayout) && assemblyVersionLayout != validTokens["VersionNumber"])
   {
-    AssemblyFileVersionLayout = ReplaceTokens(AssemblyFileVersionLayout, validTokens)
+    assemblyVersionLayout = ReplaceTokens(assemblyVersionLayout, validTokens)
       .Trim();
   }
-  if (AssemblyInformationalVersionLayout != validTokens["VersionNumber"])
+
+  if (!string.IsNullOrEmpty(assemblyFileVersionLayout) && assemblyFileVersionLayout != validTokens["VersionNumber"])
   {
-    AssemblyInformationalVersionLayout =
-      ReplaceTokens(AssemblyInformationalVersionLayout, validTokens).Trim();
+    assemblyFileVersionLayout = ReplaceTokens(assemblyFileVersionLayout, validTokens)
+      .Trim();
+  }
+
+  if (!string.IsNullOrEmpty(assemblyInformationalVersionLayout) && assemblyInformationalVersionLayout != validTokens["VersionNumber"])
+  {
+    assemblyInformationalVersionLayout =
+      ReplaceTokens(assemblyInformationalVersionLayout, validTokens).Trim();
   }
 #>
 
@@ -108,9 +112,15 @@ private void WriteAttributes()
 [assembly: AssemblyCompany("<#= validTokens["VersionCompany"] #> <#= validTokens["VersionCompanyUrl"] #>")]
 [assembly: AssemblyCopyright("Copyright © <#= validTokens["Year"] #> <#= validTokens["VersionCompany"] #>")]
 [assembly: AssemblyConfiguration("<#= validTokens["Configuration"] #> - <#= validTokens["Changeset"] #>")]
-[assembly: AssemblyVersion("<#= validTokens["VersionNumber"] #>")]
-[assembly: AssemblyFileVersion("<#= AssemblyFileVersionLayout.Trim() #>")]
-[assembly: AssemblyInformationalVersion("<#= AssemblyInformationalVersionLayout.Trim() #>")]
+<#+ if (!string.IsNullOrEmpty(assemblyVersionLayout)) { #>
+[assembly: AssemblyVersion("<#= assemblyVersionLayout #>")]
+<#+ } #>
+<#+ if (!string.IsNullOrEmpty(assemblyFileVersionLayout)) { #>
+[assembly: AssemblyFileVersion("<#= assemblyFileVersionLayout #>")]
+<#+ } #>
+<#+ if (!string.IsNullOrEmpty(assemblyInformationalVersionLayout)) { #>
+[assembly: AssemblyInformationalVersion("<#= assemblyInformationalVersionLayout #>")]
+<#+ } #>
 <#+
 
 //TODO: find a way to include other stuff in version.props for the shared asm info
@@ -121,11 +131,119 @@ private void WriteAttributes()
 
 }
 
-  private string MaxLength(string s, int length)
-  {
-    if (s.Length > 3) { return s.Substring(s.Length - 3); }
-    return s;
-  }
+    private Version GetDefaultVersion(XmlNode root)
+    {
+        var major = Int32.MinValue;
+        var minor = Int32.MinValue;
+        var build = Int32.MinValue;
+    var revision = Int32.MinValue;
+
+        var majorFromConvention = GetNode(root, "MajorVersion/text()", false);
+        int.TryParse(majorFromConvention, out major);
+
+    var minorFromConvention = GetNode(root, "MinorVersion/text()", false);
+    int.TryParse(minorFromConvention, out minor);
+
+        var buildNumberFromEnvironment = Environment.GetEnvironmentVariable("BUILD_NUMBER");
+        if (!string.IsNullOrEmpty(buildNumberFromEnvironment))
+        {
+            if (buildNumberFromEnvironment.Contains("."))
+            {
+                Version buildNumberFromEnvironmentVersion = null;
+                if (Version.TryParse(buildNumberFromEnvironment, out buildNumberFromEnvironmentVersion))
+                {
+                    if (major == Int32.MinValue)
+                    {
+                        major = buildNumberFromEnvironmentVersion.Major;
+                    }
+
+                    if (minor == Int32.MinValue)
+                    {
+                        minor = buildNumberFromEnvironmentVersion.Minor;
+                    }
+
+                    if (build == Int32.MinValue)
+                    {
+                        build = buildNumberFromEnvironmentVersion.Build;
+                    }
+
+                    if (revision == Int32.MinValue)
+                    {
+                        revision = buildNumberFromEnvironmentVersion.Revision;
+                    }
+                }
+            }
+            else
+            {
+                if (build == Int32.MinValue)
+                {
+                    int.TryParse(buildNumberFromEnvironment, out build);
+                }
+            }
+        }
+
+        var buildNumberFromConvention = GetNode(root, "BUILD_NUMBER/text()", false);
+        if (!string.IsNullOrEmpty(buildNumberFromConvention))
+        {
+            if (buildNumberFromConvention.Contains("."))
+            {
+                Version buildNumberFromConventionVersion = null;
+
+                if (Version.TryParse(buildNumberFromConvention, out buildNumberFromConventionVersion))
+                {
+                    if (major == Int32.MinValue)
+                    {
+                        major = buildNumberFromConventionVersion.Major;
+                    }
+
+                    if (minor == Int32.MinValue)
+                    {
+                        minor = buildNumberFromConventionVersion.Minor;
+                    }
+
+                    if (build == Int32.MinValue)
+                    {
+                        build = buildNumberFromConventionVersion.Build;
+                    }
+
+                    if (revision == Int32.MinValue)
+                    {
+                        revision = buildNumberFromConventionVersion.Revision;
+                    }
+                }
+            }
+            else
+            {
+                if (build == Int32.MinValue)
+                {
+                    int.TryParse(buildNumberFromConvention, out build);
+                }
+            }
+        }
+
+        if (major == Int32.MinValue)
+        {
+            major = 1;
+        }
+
+    if (minor == Int32.MinValue)
+        {
+            minor = 0;
+        }
+
+    if (build == Int32.MinValue)
+        {
+            build = Convert.ToInt32(DateTime.UtcNow.ToString("yyMM"));
+        }
+
+    if (revision == Int32.MinValue)
+    {
+        revision = Convert.ToInt32(DateTime.UtcNow.ToString("dd"));
+    }
+
+        var version = new Version(major, minor, build, revision);
+        return version;
+    }
 
   private string GetNode(XmlNode node, string xpath, bool @throw)
   {

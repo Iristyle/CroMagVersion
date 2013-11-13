@@ -1,9 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <VersioningScheme>
-	<MajorVersion>0</MajorVersion>
-	<MinorVersion>1</MinorVersion>
+	<MajorVersion>1</MajorVersion>
+	<MinorVersion>0</MinorVersion>
 	<VersionCompany></VersionCompany>
 	<VersionCompanyUrl></VersionCompanyUrl>
+	<AssemblyVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
+	<AssemblyInformationalVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyInformationalVersionLayout>
+	<AssemblyFileVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
+
 	<!-- Typically this value will be supplied by a build server like Jenkins -->
 	<!-- 
 	<BUILD_NUMBER>0</BUILD_NUMBER>
@@ -27,10 +31,5 @@
 		arbitrary variables will not resolve.  Only these whitelisted
 		variables will do anything.  All other strings, valid or not,
 		will be treated as plaintext.
-	-->
-
-	<!--
-	<AssemblyFileVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
-	<AssemblyInformationalVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyInformationalVersionLayout>
 	-->
 </VersioningScheme>
