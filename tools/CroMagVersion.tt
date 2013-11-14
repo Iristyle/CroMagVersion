@@ -59,8 +59,8 @@ private void WriteAttributes()
     //  - 0 if not specified
   { "MajorVersion", GetDefaultVersion(root).Major.ToString() },
     { "MinorVersion", GetDefaultVersion(root).Minor.ToString() },
-    { "Build", GetDefaultVersion(root).Build.ToString() },
-    { "Revision", GetDefaultVersion(root).Revision.ToString() },
+    { "BuildVersion", GetDefaultVersion(root).Build.ToString() },
+    { "RevisionVersion", GetDefaultVersion(root).Revision.ToString() },
     { "Configuration", Configuration },
     { "Changeset", GitVersion(localPath) ?? HgVersion(localPath) ?? string.Empty },
     { "YearMonth", DateTime.UtcNow.ToString("yyMM") },
@@ -74,9 +74,6 @@ private void WriteAttributes()
 
   //variables defined for consumption
   //each segment is limited to 65536, so cook craftily
-  validTokens.Add("BuildVersion", validTokens["YearMonth"]);
-  validTokens.Add("RevisionVersion", validTokens["DayNumber"] +
-    validTokens["Build"]);
   validTokens.Add("VersionNumber", string.Format("{0}.{1}.{2}.{3}",
     validTokens["MajorVersion"], validTokens["MinorVersion"],
     validTokens["BuildVersion"], validTokens["RevisionVersion"]));
@@ -248,18 +245,19 @@ private void WriteAttributes()
         }
 
     if (minor == Int32.MinValue)
-        {
-            minor = 0;
-        }
+    {
+      minor = 0;
+    }
 
     if (build == Int32.MinValue)
-        {
-            build = Convert.ToInt32(DateTime.UtcNow.ToString("yyMM"));
-        }
+    {
+        var epochDateTime = new DateTime(2000, 1, 1);
+      build = DateTime.UtcNow.Subtract(epochDateTime).Days;
+    }
 
     if (revision == Int32.MinValue)
     {
-        revision = Convert.ToInt32(DateTime.UtcNow.ToString("dd"));
+        revision = (int)DateTime.UtcNow.TimeOfDay.TotalSeconds;
     }
 
         var version = new Version(major, minor, build, revision);

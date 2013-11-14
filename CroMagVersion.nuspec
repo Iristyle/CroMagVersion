@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>CroMagVersion</id>
-    <version>0.3.5.0</version>
+    <version>0.3.6.1</version>
     <title>Cro-Magnon - Simple Automatic Versioning</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -35,6 +35,13 @@
   <files>
     <file src="tools\*" target="tools" />
     <!-- nuget package needs something in content, otherwise it won't run install.ps1 -->
-    <file src="content\README.txt" target="content\Properties\README-CroMagVersion.txt" />
+    <file src="lib\_._" target="lib\_._" />
+
+    <file src="Tools\net35\Install.ps1" target="Tools\net35\Install.ps1" />
+    <file src="Tools\net35\Uninstall.ps1" target="Tools\net35\Uninstall.ps1" />
+    <file src="Tools\net40\Install.ps1" target="Tools\net40\Install.ps1" />
+    <file src="Tools\net40\Uninstall.ps1" target="Tools\net40\Uninstall.ps1" />
+    <file src="Tools\net45\Install.ps1" target="Tools\net45\Install.ps1" />
+    <file src="Tools\net45\Uninstall.ps1" target="Tools\net45\Uninstall.ps1" />
   </files>
 </package>
