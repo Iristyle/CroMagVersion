@@ -24,19 +24,27 @@ private void WriteAttributes()
 {
 	var localPath = Path.GetDirectoryName(Host.TemplateFile);
     var SolutionDir = Path.Combine(localPath, "..\\..\\.."); //VS default
-    var ProjectDir = Path.Combine(localPath, "..\\.."); //VS default
+    var ProjectDir = Path.Combine(localPath, "..\\..\\.."); //VS default
 	var Configuration = "Unspecified";
 
 	//extra space at end is HACK to prevent a trailing \" which eats the \
 	try
 	{
-		SolutionDir = Host.ResolveAssemblyReference("$(SolutionDir)");
+		SolutionDir = Host.ResolveParameterValue("-", "-", "SolutionDir");
+		if (string.IsNullOrEmpty(SolutionDir))
+		{
+			SolutionDir = Host.ResolveAssemblyReference("$(SolutionDir)");
+		}
 		SolutionDir = SolutionDir.Remove(SolutionDir.Length - 1, 1);
 	} catch { }
 
 	try
 	{
-	    ProjectDir = Host.ResolveAssemblyReference("$(ProjectDir)");
+		ProjectDir = Host.ResolveParameterValue("-", "-", "ProjectDir");
+		if (string.IsNullOrEmpty(ProjectDir))
+		{
+	    	ProjectDir = Host.ResolveAssemblyReference("$(ProjectDir)");
+	    }
 		ProjectDir = ProjectDir.Remove(ProjectDir.Length - 1, 1);		
 	} catch { }
 
@@ -55,7 +63,7 @@ private void WriteAttributes()
 <#+
     }
 
-	var projectVersionPropsPath = Path.Combine(ProjectDir, "version.props");
+	var projectVersionPropsPath = Path.Combine(ProjectDir, "properties\\version.props");
     var projectVersionPropsXmlDocument = new XmlDocument();
     XmlNode projectRoot = null;
     if (File.Exists(projectVersionPropsPath))

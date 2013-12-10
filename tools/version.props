@@ -5,10 +5,10 @@
 	<VersionCompany></VersionCompany>
 	<VersionCompanyUrl></VersionCompanyUrl>
 
-  	<AssemblyCompanyLayout>$(VersionCompany) $(VersionCompanyUrl)</AssemblyCompanyLayout>
-  	<AssemblyCopyrightLayout>Copyright © $(Year) $(VersionCompany)</AssemblyCopyrightLayout>
-  	<AssemblyConfigurationLayout>$(Configuration) - $(Changeset)</AssemblyConfigurationLayout>
-	<AssemblyVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
+	<AssemblyCompanyLayout>$(VersionCompany) $(VersionCompanyUrl)</AssemblyCompanyLayout>
+	<AssemblyCopyrightLayout>Copyright © $(Year) $(VersionCompany)</AssemblyCopyrightLayout>
+	<AssemblyConfigurationLayout>$(Configuration) - $(Changeset)</AssemblyConfigurationLayout>
+	<AssemblyVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyVersionLayout>
 	<AssemblyInformationalVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyInformationalVersionLayout>
 	<AssemblyFileVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
 
@@ -18,22 +18,22 @@
 	-->
 
 	<!-- Available variables for a custom layout are:
-		$(MajorVersion) - from this file
-		$(MinorVersion) - from this file
-		$(BUILD_NUMBER) - original number from build server / environment variable if available, otherwise 0, unless overriden in this file
-		$(Build) - BUILD_NUMBER truncated to last 3 digits
-		$(YearMonth) - yyMM
-		$(DayNumber) - dd
-		$(Year) - yyyy
+	$(MajorVersion) - from this file
+	$(MinorVersion) - from this file
+	$(BUILD_NUMBER) - original number from build server / environment variable if available, otherwise 0, unless overriden in this file
+	$(Build) - BUILD_NUMBER truncated to last 3 digits
+	$(YearMonth) - yyMM
+	$(DayNumber) - dd
+	$(Year) - yyyy
 
-		$(BuildVersion) - $(YearMonth)
-		$(RevisionVersion) - $(DayNumber)$(Build)
+	$(BuildVersion) - $(YearMonth)
+	$(RevisionVersion) - $(DayNumber)$(Build)
 
-		$(VersionNumber) - $(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)
+	$(VersionNumber) - $(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)
 
-		Note that these are NOT proper MSBuild variables, and therefore
-		arbitrary variables will not resolve.  Only these whitelisted
-		variables will do anything.  All other strings, valid or not,
-		will be treated as plaintext.
+	Note that these are NOT proper MSBuild variables, and therefore
+	arbitrary variables will not resolve.  Only these whitelisted
+	variables will do anything.  All other strings, valid or not,
+	will be treated as plaintext.
 	-->
 </VersioningScheme>
