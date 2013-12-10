@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"> 
+  	<PropertyGroup>
+    	<CroMagVersionImported>true</CroMagVersionImported>
+    	<CroMagVersionPath Condition="'$(TargetFrameworkVersion)' == 'v3.5'">$(SolutionDir)packages\CroMagVersion.0.3.6.2\</CroMagVersionPath>
+    	<CroMagVersionPath Condition="'$(TargetFrameworkVersion)' != 'v3.5'">$(MSBuildThisFileDirectory)..\</CroMagVersionPath>
+  	</PropertyGroup>
+
+	<Target Name="CompileSharedAssemblyInfo" BeforeTargets="CoreCompile">
+        <Exec Command='$(CroMagVersionPath)Tools\TextTransform.exe -o="$(ProjectDir)Properties\CroMagVersion.cs" -a="Configuration!$(Configuration) " -a="SolutionDir!$(SolutionDir) " -a="ProjectDir!$(ProjectDir) " "$(ProjectDir)Properties\CroMagVersion.tt"' WorkingDirectory='$(CroMagVersionPath)Tools' CustomErrorRegularExpression='.*: ERROR .*'/>
+    </Target>
+</Project>

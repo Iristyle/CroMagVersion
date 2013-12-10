@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>CroMagVersion</id>
-    <version>0.3.5.0</version>
+    <version>0.3.6.8</version>
     <title>Cro-Magnon - Simple Automatic Versioning</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -33,8 +33,9 @@
     <copyright>East Point Systems 2012 and contributors</copyright>
   </metadata>
   <files>
-    <file src="tools\*" target="tools" />
     <!-- nuget package needs something in content, otherwise it won't run install.ps1 -->
-    <file src="content\README.txt" target="content\Properties\README-CroMagVersion.txt" />
+    <file src="lib\**\*" target="Lib" />
+    <file src="Content\**\*" target="Content" />
+    <file src="Tools\**\*" target="Tools" />
   </files>
 </package>
