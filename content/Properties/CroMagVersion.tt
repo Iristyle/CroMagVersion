@@ -283,7 +283,7 @@ private Version GetDefaultVersion(XmlNode projectRoot, XmlNode solutionRoot)
 
 	if (revision == Int32.MinValue)
 	{
-		revision = (int)DateTime.UtcNow.TimeOfDay.TotalSeconds;
+		revision = (int)(DateTime.UtcNow.TimeOfDay.TotalSeconds/1.35);
 	}
 
 	var version = new Version(major, minor, build, revision);
