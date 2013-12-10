@@ -9,7 +9,8 @@
 <#@ import namespace="System.Xml" #>
 //~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
 //DANGER WILL ROBINSON - TOOL GENERATED FILE - DO NOT MODIFY THIS FILE BY HAND!
-//USE THE SOLUTIONS VERSION.PROPS TO TWEAK MINOR / MAJOR VERSIONS
+//USE THE SOLUTIONS VERSION.PROPS OR PROJECTS VERSION.PROPS 
+//TO TWEAK MINOR / MAJOR VERSIONS
 //~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
 using System;
 using System.Reflection;
@@ -54,16 +55,19 @@ private void WriteAttributes()
 <#+
     }
 
-	var doc = new XmlDocument();
-    var versionPropsPath = Path.Combine(ProjectDir, "version.props");
-
-    if (!File.Exists(versionPropsPath))
+	var projectVersionPropsPath = Path.Combine(ProjectDir, "version.props");
+    var projectVersionPropsXmlDocument = new XmlDocument();
+    XmlNode projectRoot = null;
+    if (File.Exists(projectVersionPropsPath))
     {
-        versionPropsPath = Path.Combine(SolutionDir, "version.props");
+        projectVersionPropsXmlDocument.Load(projectVersionPropsPath);
+		projectRoot = projectVersionPropsXmlDocument.SelectSingleNode("VersioningScheme");
     }
 
-    doc.Load(versionPropsPath);
-	var root = doc.SelectSingleNode("VersioningScheme");
+	var solutionVersionPropsPath = Path.Combine(SolutionDir, "version.props");
+	var solutionVersionPropsXmlDocument = new XmlDocument();
+    solutionVersionPropsXmlDocument.Load(solutionVersionPropsPath);
+	var solutionRoot = solutionVersionPropsXmlDocument.SelectSingleNode("VersioningScheme");
 
 	var validTokens = new Dictionary<string, string>()
 	{
@@ -71,10 +75,10 @@ private void WriteAttributes()
 		//  - Override BUILD_NUMBER specified in version.props if present
 		//  - BUILD_NUMBER env variable as specified by a build server like Jenkins
 		//  - 0 if not specified
-		{ "MajorVersion", GetDefaultVersion(root).Major.ToString() },
-		{ "MinorVersion", GetDefaultVersion(root).Minor.ToString() },
-		{ "BuildVersion", GetDefaultVersion(root).Build.ToString() },
-		{ "RevisionVersion", GetDefaultVersion(root).Revision.ToString() },
+		{ "MajorVersion", GetDefaultVersion(projectRoot, solutionRoot).Major.ToString() },
+		{ "MinorVersion", GetDefaultVersion(projectRoot, solutionRoot).Minor.ToString() },
+		{ "BuildVersion", GetDefaultVersion(projectRoot, solutionRoot).Build.ToString() },
+		{ "RevisionVersion", GetDefaultVersion(projectRoot, solutionRoot).Revision.ToString() },
 		{ "Configuration", Configuration },
 		{ "Changeset", GitVersion(localPath) ?? HgVersion(localPath) ?? string.Empty },
 		{ "YearMonth", DateTime.UtcNow.ToString("yyMM") },
@@ -82,8 +86,8 @@ private void WriteAttributes()
 		{ "Year", DateTime.UtcNow.ToString("yyyy") },
 		//mandatory
 
-		{ "VersionCompany", GetNode(root, "VersionCompany/text()", true) },
-		{ "VersionCompanyUrl", GetNode(root, "VersionCompanyUrl/text()", true) },
+		{ "VersionCompany", GetNode(projectRoot, solutionRoot, "VersionCompany/text()", true) },
+		{ "VersionCompanyUrl", GetNode(projectRoot, solutionRoot, "VersionCompanyUrl/text()", true) },
 	};
 
 	//variables defined for consumption
@@ -92,12 +96,12 @@ private void WriteAttributes()
 	validTokens["MajorVersion"], validTokens["MinorVersion"],
 	validTokens["BuildVersion"], validTokens["RevisionVersion"]));
 
-	var assemblyCompanyLayout = GetNode(root, "AssemblyCompanyLayout/text()", false) ?? string.Empty;
-	var assemblyCopyrightLayout = GetNode(root, "AssemblyCopyrightLayout/text()", false) ?? string.Empty;
-	var assemblyConfigurationLayout = GetNode(root, "AssemblyConfigurationLayout/text()", false) ?? string.Empty;
-	var assemblyVersionLayout = GetNode(root, "AssemblyVersionLayout/text()", false) ?? string.Empty;
-	var assemblyFileVersionLayout = GetNode(root, "AssemblyFileVersionLayout/text()", false) ?? string.Empty;
-	var assemblyInformationalVersionLayout = GetNode(root, "AssemblyInformationalVersionLayout/text()", false) ?? string.Empty;
+	var assemblyCompanyLayout = GetNode(projectRoot, solutionRoot, "AssemblyCompanyLayout/text()", false) ?? string.Empty;
+	var assemblyCopyrightLayout = GetNode(projectRoot, solutionRoot, "AssemblyCopyrightLayout/text()", false) ?? string.Empty;
+	var assemblyConfigurationLayout = GetNode(projectRoot, solutionRoot, "AssemblyConfigurationLayout/text()", false) ?? string.Empty;
+	var assemblyVersionLayout = GetNode(projectRoot, solutionRoot, "AssemblyVersionLayout/text()", false) ?? string.Empty;
+	var assemblyFileVersionLayout = GetNode(projectRoot, solutionRoot, "AssemblyFileVersionLayout/text()", false) ?? string.Empty;
+	var assemblyInformationalVersionLayout = GetNode(projectRoot, solutionRoot, "AssemblyInformationalVersionLayout/text()", false) ?? string.Empty;
 
 	// search replace msbuild style tokens that a user might incorporate
 	if (!string.IsNullOrEmpty(assemblyCompanyLayout))
@@ -163,17 +167,17 @@ private void WriteAttributes()
 
 }
 
-private Version GetDefaultVersion(XmlNode root)
+private Version GetDefaultVersion(XmlNode projectRoot, XmlNode solutionRoot)
 {
 	var major = Int32.MinValue;
 	var minor = Int32.MinValue;
 	var build = Int32.MinValue;
 	var revision = Int32.MinValue;
 
-	var majorFromConvention = GetNode(root, "MajorVersion/text()", false);
+	var majorFromConvention = GetNode(projectRoot, solutionRoot, "MajorVersion/text()", false);
 	int.TryParse(majorFromConvention, out major);
 
-	var minorFromConvention = GetNode(root, "MinorVersion/text()", false);
+	var minorFromConvention = GetNode(projectRoot, solutionRoot, "MinorVersion/text()", false);
 	int.TryParse(minorFromConvention, out minor);
 
 	var buildNumberFromEnvironment = Environment.GetEnvironmentVariable("BUILD_NUMBER");
@@ -214,7 +218,7 @@ private Version GetDefaultVersion(XmlNode root)
 		}
 	}
 
-	var buildNumberFromConvention = GetNode(root, "BUILD_NUMBER/text()", false);
+	var buildNumberFromConvention = GetNode(projectRoot, solutionRoot, "BUILD_NUMBER/text()", false);
 	if (!string.IsNullOrEmpty(buildNumberFromConvention))
 	{
 		if (buildNumberFromConvention.Contains("."))
@@ -278,10 +282,19 @@ private Version GetDefaultVersion(XmlNode root)
 	return version;
 }
 
-private string GetNode(XmlNode node, string xpath, bool @throw)
+private string GetNode(XmlNode projectRoot, XmlNode solutionRoot, string xpath, bool @throw)
 {
-	var child = node.SelectSingleNode(xpath);
-	if (child != null) { return child.Value; }
+    if (projectRoot != null)
+    {
+        var projectChild = projectRoot.SelectSingleNode(xpath);
+        if (projectChild != null)
+        {
+            return projectChild.Value;
+        }
+    }
+
+    var solutionChild = solutionRoot.SelectSingleNode(xpath);
+	if (solutionChild != null) { return solutionChild.Value; }
 
 	if (!@throw) { return null; }
 	var name = xpath.Replace("/text()", "");
