@@ -40,10 +40,9 @@ CroMagVersion allows projects to share the following assembly attributes:
   have during a build (and will further be regenerated on the next build /
   rebuild cycle).**
 
-* The constant ```CROMAG``` is added to any project configurations that DOES NOT
-have the ```DEBUG``` constant defined.  Use this constant to restrict the
-generation of versioning information for local developer builds.  Given the
-nature of metadata versioning it is impossible to support [incremental builds](http://msdn.microsoft.com/en-us/library/ms171483.aspx).
+* The constant ```CROMAG``` is added to project configurations. Remove this constant from project configurations that you do not wish 
+to have version information built. (e.g., Remove for DEBUG builds) Given the
+nature of metadata versioning it is impossible to support [incremental builds](http://msdn.microsoft.com/en-us/library/ms171483.aspx). 
 For large projects, its vital to define the ```CROMAG``` constant on only the
 build configuration used by the build server.
 
@@ -152,6 +151,7 @@ even though it exists in the csproj on disk. This appears to be a VS bug.
 
 * Adding PatchVersion variable to support semantic versioning
 * Now creates version information for debug builds out of the box
+* Fixes issue where a broken readme reference is left behind in project
 
 #### 0.3.5.0 - minor bugfix
 
