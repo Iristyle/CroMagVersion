@@ -141,7 +141,7 @@ $msbuild = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollecti
 
 #Add the CROMAG property to any constants that aren't defined DEBUG
 $msbuild.Xml.Properties |
-  ? { ($_.Name -ieq 'DefineConstants') -and ($_.Value -inotmatch 'DEBUG') `
+  ? { ($_.Name -ieq 'DefineConstants') `
     -and ($_.Value -inotmatch 'CROMAG') } |
   % { $_.Value += ';CROMAG' }
 
