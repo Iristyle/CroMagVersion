@@ -68,6 +68,7 @@ private void WriteAttributes()
     //mandatory
     { "MajorVersion", GetNode(root, "MajorVersion/text()", true) },
     { "MinorVersion", GetNode(root, "MinorVersion/text()", true) },
+	{ "PatchVersion", GetNode(root, "MinorVersion/text()", false) },
     { "VersionCompany", GetNode(root, "VersionCompany/text()", true) },
     { "VersionCompanyUrl", GetNode(root, "VersionCompanyUrl/text()", true) },
   };

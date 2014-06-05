@@ -52,6 +52,7 @@ build configuration used by the build server.
 ```xml
 <MajorVersion>0</MajorVersion>
 <MinorVersion>1</MinorVersion>
+<PatchVersion>0</PatchVersion>
 <VersionCompany></VersionCompany>
 <VersionCompanyUrl></VersionCompanyUrl>
 <!-- Typically this value will be supplied by a build server like Jenkins -->
@@ -96,6 +97,7 @@ The following is pretty self-explanatory:
 <!-- Available variables for a custom layout are:
   $(MajorVersion) - from this file
   $(MinorVersion) - from this file
+  $(PatchVersion) - from this file
   $(BUILD_NUMBER) - original number from build server / environment variable if available, otherwise 0, unless overriden in this file
   $(Build) - BUILD_NUMBER truncated to last 3 digits
   $(YearMonth) - yyMM
@@ -145,6 +147,10 @@ condition with generation of SharedAssemblyInfo.cs.
 even though it exists in the csproj on disk. This appears to be a VS bug.
 
 ## Release Notes
+
+#### 0.4.0.0 - feature enhancement
+
+* Adding PatchVersion variable to support semantic versioning
 
 #### 0.3.5.0 - minor bugfix
 
