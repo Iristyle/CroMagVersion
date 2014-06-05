@@ -151,6 +151,7 @@ even though it exists in the csproj on disk. This appears to be a VS bug.
 #### 0.4.0.0 - feature enhancement
 
 * Adding PatchVersion variable to support semantic versioning
+* Now creates version information for debug builds out of the box
 
 #### 0.3.5.0 - minor bugfix
 
