@@ -152,6 +152,7 @@ even though it exists in the csproj on disk. This appears to be a VS bug.
 * Adding PatchVersion variable to support semantic versioning
 * Now creates version information for debug builds out of the box
 * Fixes issue where a broken readme reference is left behind in project
+* Configuration assembly property now includes branching information instead of build configuration
 
 #### 0.3.5.0 - minor bugfix
 
