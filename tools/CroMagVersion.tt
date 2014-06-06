@@ -62,6 +62,7 @@ private void WriteAttributes()
     { "Revision", "0" },
     { "Configuration", Configuration },
     { "Changeset", GitVersion(localPath) ?? HgVersion(localPath) ?? string.Empty },
+	{ "Branch", GitBranch(localPath) ?? string.Empty },
     { "YearMonth", DateTime.UtcNow.ToString("yyMM") },
     { "DayNumber", DateTime.UtcNow.ToString("dd") },
     { "Year", DateTime.UtcNow.ToString("yyyy") },
@@ -108,7 +109,7 @@ private void WriteAttributes()
 
 [assembly: AssemblyCompany("<#= validTokens["VersionCompany"] #> <#= validTokens["VersionCompanyUrl"] #>")]
 [assembly: AssemblyCopyright("Copyright © <#= validTokens["Year"] #> <#= validTokens["VersionCompany"] #>")]
-[assembly: AssemblyConfiguration("<#= validTokens["Configuration"] #> - <#= validTokens["Changeset"] #>")]
+[assembly: AssemblyConfiguration("<#= validTokens["Branch"] #>-<#= validTokens["Changeset"] #>")]
 [assembly: AssemblyVersion("<#= validTokens["VersionNumber"] #>")]
 [assembly: AssemblyFileVersion("<#= AssemblyFileVersionLayout.Trim() #>")]
 [assembly: AssemblyInformationalVersion("<#= AssemblyInformationalVersionLayout.Trim() #>")]
@@ -244,5 +245,34 @@ private void WriteAttributes()
     }
 
     return GetProcessOutput(path, gitPath, "log -1 --pretty=format:%h");
+  }
+  
+  public string GitBranch(string path)
+  {
+    path = path ?? ".";
+
+    //Log.LogMessage(MessageImportance.Low, "path is {0}", path);
+    var programFiles = string.Format(@"{0}\Program Files", drive);
+    var programFilesx86 = string.Format(@"{0}\Program Files (x86)", drive);
+    var git = string.Format(@"{0}\git\bin\git.exe", programFiles);
+    var gitx86 = string.Format(@"{0}\git\bin\git.exe", programFilesx86);
+
+    //try standard locations and fall back to assumption of it being in path
+    var gitPath = File.Exists(gitx86) ? gitx86 : File.Exists(git) ? git : null;
+
+    if (null == gitPath)
+    {
+      foreach (string p in Environment.GetEnvironmentVariable("PATH").Split(';'))
+      {
+        var test = Path.Combine(p, "git.exe");
+        if (File.Exists(test))
+        {
+          gitPath = test;
+          break;
+        }
+      }
+    }
+
+    return GetProcessOutput(path, gitPath, "rev-parse --abbrev-ref HEAD").Replace("\n",string.Empty).Replace("\r",string.Empty);
   }
 #>
