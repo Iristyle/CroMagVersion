@@ -72,6 +72,7 @@ private void WriteAttributes()
 	{ "PatchVersion", GetNode(root, "PatchVersion/text()", false) },
     { "VersionCompany", GetNode(root, "VersionCompany/text()", true) },
     { "VersionCompanyUrl", GetNode(root, "VersionCompanyUrl/text()", true) },
+	{ "VERSION_SUFFIX", Environment.GetEnvironmentVariable("VERSION_SUFFIX") ?? string.Empty },
   };
 
   //variables defined for consumption

@@ -14,6 +14,7 @@
 		$(MajorVersion) - from this file
 		$(MinorVersion) - from this file
 		$(PatchVersion) - from this file
+		$(VERSION_SUFFIX) - VERSION_SUFFIX environment variable if available otherwise emtpy string
 		$(BUILD_NUMBER) - original number from build server / environment variable if available, otherwise 0, unless overriden in this file
 		$(Build) - BUILD_NUMBER truncated to last 3 digits
 		$(YearMonth) - yyMM
@@ -33,6 +34,6 @@
 
 	<!--
 	<AssemblyFileVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyFileVersionLayout>
-	<AssemblyInformationalVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyInformationalVersionLayout>
 	-->
+	<AssemblyInformationalVersionLayout>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)$(VERSION_SUFFIX)</AssemblyInformationalVersionLayout>
 </VersioningScheme>

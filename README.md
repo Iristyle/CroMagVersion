@@ -147,6 +147,10 @@ even though it exists in the csproj on disk. This appears to be a VS bug.
 
 ## Release Notes
 
+#### 0.5.0.0 - feature enhancement
+
+* Added $(VERSION_SUFFIX) environment variable token to facilitate version suffixes such as -beta in Nuget builds
+
 #### 0.4.0.0 - feature enhancement
 
 * Adding PatchVersion variable to support semantic versioning
