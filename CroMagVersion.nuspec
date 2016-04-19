@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>CroMagVersion</id>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
     <title>Cro-Magnon - Simple Automatic Versioning</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -10,20 +10,7 @@
     <description>An MSBuild project integration that makes it easy to keep version numbers synced across all projects in a solution based on a simple date scheme and user provided major / minor version numbers.  Provides a single source of truth for versioning, and modifies it at build time as necessary to keep assembly metadata fresh.</description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
-        * No more Win32Exception when hg.exe or git.exe not in PATH
-        * File generation is now provided through a T4 template instead of via
-        an imported MSBuild target.  This was necessary to better support
-        package restore, and should be a transparent under-the-hood change.
-        * Includes MonoDevelops TextTransform.exe to codegen instead of relying
-        on anything that ships with Visual Studio
-        * Adds a new CROMAG variable that must be defined to generate versioning
-        code - by default this is enabled for any non-DEBUG builds
-        * Removed the dependency on an msbuild mercurial task
-        * Breaking change - no longer emits MSBuild variables $(VersionNumber)
-        $(Changeset) $(BuildVersion) or $(RevisionVersion)
-        * Minor bugfixes to handle project paths with spaces, and non-standard
-        Git and Mercurial locations on disk.
-        * Initial DEBUG builds would fail until a RELEASE build generated info
+        * Added VERSION_SUFFIX environment variable token to facilitate version suffixes such as -beta in Nuget builds
         </releaseNotes>
     <projectUrl>https://github.com/EastPoint/CroMagVersion</projectUrl>
     <licenseUrl>https://github.com/EastPoint/CroMagVersion/blob/master/LICENSE.md</licenseUrl>
