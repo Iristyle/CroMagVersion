@@ -141,7 +141,7 @@ $msbuild = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollecti
 
 #Add the CROMAG property to any constants that aren't defined DEBUG
 $msbuild.Xml.Properties |
-  ? { ($_.Name -ieq 'DefineConstants') -and ($_.Value -inotmatch 'DEBUG') `
+  ? { ($_.Name -ieq 'DefineConstants') `
     -and ($_.Value -inotmatch 'CROMAG') } |
   % { $_.Value += ';CROMAG' }
 
@@ -193,11 +193,5 @@ $item = AddOrGetItem $msbuild.Xml 'None' $templatePath
 SetItemMetadata $item 'Link' 'Properties\CroMagVersion.tt'
 SetItemMetadata $item 'Generator' 'TextTemplatingFileGenerator'
 SetItemMetadata $item 'LastGenOutput' 'SharedAssemblyInfo.cs'
-
-#remove our garbage file that we used to kick off install.ps1
-RemoveItem $msbuild.Xml 'Properties\README-CroMagVersion.txt'
-$readmePath = Join-Path $projectPath `
-  (Get-RelativeFilePath $project.ProjectItems 'README-CroMagVersion.txt')
-Remove-Item $readmePath
 
 $project.Save($project.FullName)

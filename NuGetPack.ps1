@@ -1,5 +1,5 @@
 param(
-  [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+  [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
   [string]
   $apiKey,
 
@@ -74,5 +74,7 @@ function Invoke-Push
 $script:nuget = Restore-Nuget
 del *.nupkg
 Invoke-Pack
-if ($operation -eq 'Push') { Invoke-Push }
-del *.nupkg
+if ($operation -eq 'Push') {
+	Invoke-Push 
+	del *.nupkg
+}
